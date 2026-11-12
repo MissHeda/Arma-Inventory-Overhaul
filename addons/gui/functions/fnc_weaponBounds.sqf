@@ -93,7 +93,7 @@ if ((_scene getOrDefault ["boundsFor", []]) isNotEqualTo _fitted) then {
         };
 
         {
-            _x params ["_partModel", "_slot", ["_folded", false]];
+            _x params ["_partModel", "_slot", ["_folded", false], ["_small", true]];
 
             if (_partModel isEqualTo "" || {_slot isEqualTo []}) then {continue};
 
@@ -109,6 +109,18 @@ if ((_scene getOrDefault ["boundsFor", []]) isNotEqualTo _fitted) then {
             // M14 EBR with a Harris bipod, measured in game, 0.7.10).
             if (_folded) then {
                 _partMin set [2, (_partMin select 2) max ((_partMax select 2) - BIPOD_FOLDED)];
+            };
+
+            // An attachment is a small thing round its slot: what its model says beyond PART_REACH beside, below or above the slot
+            // is something hidden on it, not its shape - RHS's ACOG measured 26 cm high, and the M4 it sat on came out half as
+            // large as its card (measured in game, 0.7.13). Not a magazine: a drum hangs deep.
+            if (_small) then {
+                (PART_REACH) params ["_beside", "_below", "_above"];
+
+                _partMin set [1, (_partMin select 1) max -_beside];
+                _partMax set [1, (_partMax select 1) min _beside];
+                _partMin set [2, (_partMin select 2) max -_below];
+                _partMax set [2, (_partMax select 2) min _above];
             };
 
             _slot params ["_place", "_dir", "_up"];
@@ -135,7 +147,7 @@ if ((_scene getOrDefault ["boundsFor", []]) isNotEqualTo _fitted) then {
             [[[_rail, ""] select !(_rail isEqualType "")] call FUNC(itemModel), [["weapon_slots\side"]] call _fnc_slot],
             [[[_optic, ""] select !(_optic isEqualType "")] call FUNC(itemModel), [["weapon_slots\top"]] call _fnc_slot],
             [[[_bipod, ""] select !(_bipod isEqualType "")] call FUNC(itemModel), [["weapon_slots\underbarrel", "weapon_slots\bipod"]] call _fnc_slot, true],
-            [_magazineModel, [["magazineslot"]] call _fnc_slot]
+            [_magazineModel, [["magazineslot"]] call _fnc_slot, false, false]
         ];
 
         deleteVehicle _probe;

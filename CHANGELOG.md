@@ -2,6 +2,32 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.7.13 - beta
+
+### Added
+
+- Inspect in 3D: a weapon opens as its card shows it, and how you turn, zoom and move it there is that weapon's own
+  view - its card shows it the same way at once, and it is kept per weapon and per player, also after a restart.
+  Buttons under the 3D view: from the left side, from the right side, farther, nearer, reset, and "On slot" (on by
+  default) to switch all of it off (#73).
+- Attachments view: the menu of parts is titled with what it changes - Muzzle, Optic, Rail, Bipod, Magazine.
+
+### Changed
+
+- Real weapon pictures are on by default only where the video options' Picture-in-Picture quality is High, Very High
+  or Ultra; below that they are off by default.
+- Weapon cards: weapons are shown larger, and the attachments' plates are larger with their pictures in from the frame.
+
+### Fixed
+
+- Arsenal: what a uniform, vest or backpack lying in your uniform, vest or backpack held was deleted when the Virtual
+  Arsenal opened, and in ACE Arsenal when another uniform, vest or backpack was picked or a loadout loaded (#72).
+  Tested in game.
+- 3D pictures follow your field of view now. With another field of view than the game's default, weapons came out
+  too small or too large on their cards, and the Attachments view's dots and lines lay beside the parts they name.
+- Attachments view: some weapons stood a few degrees off their side.
+- Weapon cards in 3D: RHS weapons with an optic or a grenade launcher came out half as large as their card.
+
 ## 0.7.12 - beta
 
 ### Added

@@ -105,6 +105,12 @@
 // seconds (fnc_keepPlaces).
 #define KEPT_REFRESH 0.2
 
+// How often what the uniforms, vests and backpacks lying in the soldier's containers hold is noted again while an
+// arsenal is open, in seconds, and how long one the arsenal's rebuild lost waits for its new object to come back
+// (fnc_keepNested).
+#define NESTED_REFRESH 0.2
+#define NESTED_LOST_KEEP 2
+
 // Frames after a loadout was set in which nothing is moved out of the soldier's containers (fnc_stageOverflow).
 #define LOADOUT_QUIET_FRAMES 4
 

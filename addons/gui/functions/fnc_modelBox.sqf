@@ -33,6 +33,11 @@
 // No weapon reaches this far beside or above its own axis (y, z), or along it (x), in metres.
 #define FAR_ACROSS 0.9
 #define FAR_ALONG 2.5
+// How far out past the Geometry LOD's face the visual LOD's may lie to be the shape's still, along the barrel (x) and across it
+// (y, z), in metres: a barrel is often longer than its plain block, a grip or a sight a little.
+#define GEOMETRY_TRUST [0.2, 0.1, 0.1]
+// How far out past the farthest proxy a face taken from the Memory LOD may lie, in metres.
+#define MEMORY_PAST 0.1
 
 params [["_probe", objNull, [objNull]]];
 
@@ -121,11 +126,35 @@ private _most = [];
 
         // The first of them that has it clean. (The Memory LOD's where it lies farther out than the Geometry LOD's was tried:
         // its lowest points lie well under most rifles, and they sat too high on their cards - measured in game, 0.7.10.)
+        //
+        // The visual LOD's own is not taken where it lies far out past the Geometry LOD's (GEOMETRY_TRUST): parts that are hidden
+        // while the weapon lies somewhere count into its box - a folded-out sight, another barrel, proxies turned some other way -,
+        // and RHS's M4 measured 51 cm deep, its ACOG 26 cm high, and came out small on their cards (measured in game, 0.7.13).
         private _picked = call {
+            if (_visual isNotEqualTo [] && {_geometry isNotEqualTo []}) exitWith {
+                private _out = ((_visual select 0) - (_geometry select 0)) * ([-1, 1] select _side);
+
+                [_visual, _geometry] select (_out > (GEOMETRY_TRUST select _axis))
+            };
+
             if (_visual isNotEqualTo []) exitWith {_visual};
             if (_geometry isNotEqualTo []) exitWith {_geometry};
 
-            _memory
+            // The Memory LOD's points lie on the weapon, but a few far off it - an eye point for a grenade launcher's sight 26 cm
+            // over RHS's M4 with an M203, which then came out half as large as its card (measured in game, 0.7.13): no farther
+            // out than MEMORY_PAST beyond the farthest proxy on that side, where the model has proxies.
+            private _places = [];
+
+            {
+                _places append ((_x select 2) apply {(_x select 0) select _axis});
+            } forEach _lods;
+
+            if (_memory isEqualTo [] || {_places isEqualTo []}) exitWith {_memory};
+
+            [
+                [(_memory select 0) max ((selectMin _places) - MEMORY_PAST)],
+                [(_memory select 0) min ((selectMax _places) + MEMORY_PAST)]
+            ] select _side
         };
 
         // No LOD has this face clean: the farthest proxy's own place on that side.

@@ -28,6 +28,9 @@
  * While a scene stands, the Picture-in-Picture view distance is INSPECT_3D_PIP_DISTANCE, the player's own given back with
  * "stop".
  *
+ * A weapon looked at plainly starts as its card shows it and is turned, zoomed and moved as the player's own view of that weapon
+ * (fnc_weaponView, fnc_viewCamera; Mia, 0.7.13): kept per weapon, and the card shows the weapon the same way at once.
+ *
  * Arguments:
  * 0: What to do <STRING>
  *    "start"   the scene for the item, unless it stands for it already - the one before goes (arguments: [class, attachments,
@@ -37,7 +40,8 @@
  *    "zoom"    nearer for a turn of the wheel up, farther for one down (arguments: [turn])
  *    "pan"     the camera and what it looks at move across and up or down, as the middle mouse button drags them - the item
  *              moves with the mouse, at most its frame away from where it was (arguments: [across, down])
- *    "reset"   the view the scene started with
+ *    "reset"   the view the scene started with - a weapon looked at plainly: from its left side, fitted, and its own view goes
+ *    "side"    a weapon looked at plainly, straight from its left side or its right, fitted (arguments: [0 or 180])
  *    "centre"  a weapon's own middle - with what it carries (fnc_weaponBounds) - is what the camera looks at and turns round,
  *              not its grip, and the view starts so far off that the whole weapon fits the box (fnc_fitView); asked by the
  *              scene itself once the holder's model is loaded, and when the weapon's parts change
@@ -138,6 +142,49 @@ private _fnc_refit = {
     _scene set ["fitted", _fitted];
 };
 
+// A weapon looked at plainly - not in the Attachments view, which keeps its side on - is shown by the player's own view of it
+// (fnc_weaponView): the scene's "view" [turn, pitch, zoom, across, up] from the side view "sideDir", the muzzle to the left as
+// its card shows it. Turning, zooming and moving change the view, and the camera is made of it (fnc_viewCamera).
+private _fnc_viewed = {
+    count _scene > 0 && {_scene getOrDefault ["weapon", false]} && {!(_scene getOrDefault ["side", false])} && {"sideDir" in _scene}
+};
+
+// What the box holds of the picture, across and up and down from its middle.
+private _fnc_tans = {
+    (uiNamespace getVariable [QGVAR(inspect3DShown), [1, 1]]) params [["_shownX", 1], ["_shownY", 1]];
+
+    [CAMERA_TAN * INSPECT_3D_ASPECT * (_shownX max 0.05), CAMERA_TAN * (_shownY max 0.05)]
+};
+
+// The camera where the view puts it. False while the weapon's box is not known.
+private _fnc_view = {
+    private _corners = [_scene] call FUNC(weaponBounds);
+
+    if (isNil "_corners" || {_corners isEqualTo []}) exitWith {false};
+
+    (call _fnc_tans) params ["_tanH", "_tanV"];
+
+    ([_corners, _scene get "sideDir", _scene get "view", _tanH, _tanV, INSPECT_3D_ROOM] call FUNC(viewCamera)) params ["_target", "_distance", "_dir", "_pitch"];
+
+    _scene set ["target", _target];
+    _scene set ["origin", +_target];
+    _scene set ["distance", (_distance max 0.08) min 8];
+    _scene set ["dir", _dir];
+    _scene set ["pitch", _pitch];
+
+    call _fnc_camera;
+
+    true
+};
+
+// The view is the weapon's own from now on, and its card shows it (fnc_weaponView - not with "Show on slot" off).
+private _fnc_keep = {
+    if (!GVAR(viewApply)) exitWith {};
+
+    ["set", _scene get "class", _scene get "view"] call FUNC(weaponView);
+    ["view", [_scene get "class"]] call FUNC(cardScene);
+};
+
 switch (_mode) do {
     case "start": {
         _arguments params [["_class", "", [""]], ["_attachments", [], [[]]], ["_target3D", INSPECT_3D_TARGET, [""]], ["_side", false, [false]]];
@@ -167,6 +214,11 @@ switch (_mode) do {
             _scene set ["startPitch", _pitch];
 
             call _fnc_camera;
+
+            // Plainly again: the weapon's own view.
+            if (!_side) then {
+                ["centre"] call FUNC(inspect3D);
+            };
         };
 
         if (_running && {(_scene getOrDefault ["attachments", []]) isEqualTo _attachments}) exitWith {};
@@ -366,6 +418,13 @@ switch (_mode) do {
         _scene set ["startDir", 45];
         _scene set ["startPitch", _pitch];
         _scene set ["facing", _side];
+
+        // A weapon looked at plainly starts as its card shows it ("centre", once the holder's model is there): until then from
+        // where most weapons lie side on, so the picture does not swing round a moment later.
+        if (!_side && {_scene getOrDefault ["weapon", false]}) then {
+            _scene set ["dir", -180];
+            _scene set ["pitch", CARD_3D_PITCH];
+        };
         _scene set ["distance", _distance];
         _scene set ["start", _distance];
         _scene set ["near", _distance * 0.3];
@@ -404,6 +463,34 @@ switch (_mode) do {
         private _corners = [_scene] call FUNC(weaponBounds);
 
         if (isNil "_corners" || {_corners isEqualTo []}) exitWith {};
+
+        // Looked at plainly: by the player's own view of this weapon, from the side its card shows - the muzzle to the left.
+        if !(_scene getOrDefault ["side", false]) exitWith {
+            if !("sideDir" in _scene) then {
+                private _holder = (_scene get "objects") param [1, objNull];
+                private _base = _holder modelToWorldWorld (_holder selectionPosition ["proxy:\a3\characters_f\proxies\weapon.001", 0.5]);
+                private _muzzle = ([_scene] call FUNC(weaponPoints));
+
+                _muzzle = if (isNil "_muzzle") then {[]} else {_muzzle getOrDefault ["muzzle", []]};
+
+                private _sideDir = -180;
+
+                if (count _muzzle == 3) then {
+                    private _barrel = _muzzle vectorDiff _base;
+                    _barrel set [2, 0];
+
+                    if (vectorMagnitude _barrel >= 0.05) then {
+                        _barrel = vectorNormalized _barrel;
+                        _sideDir = (-(_barrel select 1)) atan2 (_barrel select 0);
+                    };
+                };
+
+                _scene set ["sideDir", _sideDir];
+                _scene set ["view", ["get", _scene get "class"] call FUNC(weaponView)];
+            };
+
+            call _fnc_view;
+        };
 
         // The whole weapon in the middle of the box and fitted to it from where the view starts - the front left, or side on.
         (uiNamespace getVariable [QGVAR(inspect3DShown), [1, 1]]) params [["_shownX", 1], ["_shownY", 1]];
@@ -453,11 +540,24 @@ switch (_mode) do {
         GVAR(scene3D) = createHashMap;
         GVAR(inspect3DTurn) = [];
         GVAR(inspect3DPan) = [];
+
+        // What the player made of his weapons' views is written down (fnc_weaponView).
+        ["save"] call FUNC(weaponView);
     };
     case "turn": {
         if (count _scene == 0) exitWith {};
 
         _arguments params [["_across", 0, [0]], ["_down", 0, [0]]];
+
+        if (call _fnc_viewed) exitWith {
+            private _view = _scene get "view";
+
+            _view set [0, (_view select 0) + _across * INSPECT_3D_TURN_ACROSS];
+            _view set [1, (((_view select 1) + _down * INSPECT_3D_TURN_DOWN) max -80) min 80];
+
+            call _fnc_view;
+            call _fnc_keep;
+        };
 
         // The item follows the mouse: dragged to the right, its front turns to the right.
         _scene set ["dir", (_scene get "dir") + _across * INSPECT_3D_TURN_ACROSS];
@@ -475,6 +575,15 @@ switch (_mode) do {
 
         if (_turn == 0) exitWith {};
 
+        if (call _fnc_viewed) exitWith {
+            private _view = _scene get "view";
+
+            _view set [2, (((_view select 2) * (1.15 ^ ((_turn max -6) min 6))) max WEAPON_VIEW_ZOOM_MIN) min WEAPON_VIEW_ZOOM_MAX];
+
+            call _fnc_view;
+            call _fnc_keep;
+        };
+
         // By how far the wheel turned: several notches in one frame come as one turn of that many.
         private _distance = (_scene get "distance") / (1.15 ^ ((_turn max -6) min 6));
 
@@ -486,6 +595,22 @@ switch (_mode) do {
         if (count _scene == 0) exitWith {};
 
         _arguments params [["_across", 0, [0]], ["_down", 0, [0]]];
+
+        // The weapon goes with the mouse: the camera's aim the other way, in half pictures at the fitted distance - less the
+        // nearer it is zoomed.
+        if (call _fnc_viewed) exitWith {
+            private _view = _scene get "view";
+
+            (call _fnc_tans) params ["_tanH", "_tanV"];
+
+            private _zoom = (_view select 2) max WEAPON_VIEW_ZOOM_MIN;
+
+            _view set [3, (((_view select 3) - _across * INSPECT_3D_PAN / (_zoom * _tanH)) max -WEAPON_VIEW_MOVE) min WEAPON_VIEW_MOVE];
+            _view set [4, (((_view select 4) + _down * INSPECT_3D_PAN / (_zoom * _tanV)) max -WEAPON_VIEW_MOVE) min WEAPON_VIEW_MOVE];
+
+            call _fnc_view;
+            call _fnc_keep;
+        };
 
         private _dir = _scene get "dir";
         private _distance = _scene get "distance";
@@ -507,8 +632,27 @@ switch (_mode) do {
 
         call _fnc_camera;
     };
+    // A weapon looked at plainly, straight from its left side (turn 0) or its right (180), fitted (the buttons under the box).
+    case "side": {
+        if !(call _fnc_viewed) exitWith {};
+
+        _arguments params [["_turn", 0, [0]]];
+
+        _scene set ["view", [_turn, CARD_3D_PITCH, 1, 0, 0]];
+
+        call _fnc_view;
+        call _fnc_keep;
+    };
     case "reset": {
         if (count _scene == 0) exitWith {};
+
+        // A weapon's own view goes: plainly from the left side, as its card shows any weapon.
+        if (call _fnc_viewed) exitWith {
+            _scene set ["view", +WEAPON_VIEW_PLAIN];
+
+            call _fnc_view;
+            call _fnc_keep;
+        };
 
         _scene set ["target", +(_scene get "origin")];
         _scene set ["dir", _scene getOrDefault ["startDir", 45]];
@@ -527,8 +671,13 @@ switch (_mode) do {
 
         if (count _muzzle != 3) exitWith {};
 
-        // The barrel, level: from the weapon's base to its muzzle.
-        private _barrel = _muzzle vectorDiff (_scene get "origin");
+        // The barrel, level: from the weapon's base on the holder to its muzzle - not from what the view turns round, which lies
+        // beside the barrel (the weapon's middle, or the holder's own place before its model is loaded: the MX stood 11 degrees
+        // off its side, measured in game, 0.7.13).
+        private _holder = (_scene getOrDefault ["objects", []]) param [1, objNull];
+        private _base = if (isNull _holder) then {[0, 0, 0]} else {_holder selectionPosition ["proxy:\a3\characters_f\proxies\weapon.001", 0.5]};
+        private _from = if (_base isEqualTo [0, 0, 0]) then {_scene get "origin"} else {_holder modelToWorldWorld _base};
+        private _barrel = _muzzle vectorDiff _from;
         _barrel set [2, 0];
 
         // Too short to tell - a model whose muzzle sits at its base: the front left stays.

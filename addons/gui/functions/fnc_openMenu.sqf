@@ -36,6 +36,7 @@
  *    tip <NUMBER> (default: 0)
  * 4: A note under the choices, a line of plain muted text - what the choices leave out, never a choice of its own
  *    <STRING> (default: "")
+ * 5: A title over the choices, what they are for <STRING> (default: "")
  *
  * Return Value:
  * None
@@ -48,7 +49,7 @@
 
 disableSerialization;
 
-params ["_display", "_choices", ["_at", [], [[]]], ["_across", 0, [0]], ["_note", "", [""]]];
+params ["_display", "_choices", ["_at", [], [[]]], ["_across", 0, [0]], ["_note", "", [""]], ["_title", "", [""]]];
 
 // A field that had the cursor before the menu took the focus, to have it back when the menu goes - the
 // first menu's, when this one replaces another or is the same made again on top (fnc_raiseMenu). Nothing
@@ -109,6 +110,16 @@ if (_across > 0) then {
     _height = (ceil (count _choices / _columns)) * (_tileH + _tileGap) - _tileGap + _padY * 2;
 };
 
+// A title over the choices - what they are for: the part of a weapon a click on its box changes (fnc_partChoices; Mia, 0.7.13:
+// "one should see which thing one edits, the bipod and so on").
+private _titleSize = _textUnit * 0.55;
+private _titleH = [0, _textUnit * 0.95] select (_title isNotEqualTo "");
+
+if (_title isNotEqualTo "") then {
+    _width = _width max ((_title getTextWidth [_font, _titleSize]) * TEXT_SLACK + _padX * 2);
+    _height = _height + _titleH;
+};
+
 // The note's line under the choices, as wide as its words need.
 private _noteSize = _textUnit * 0.5;
 private _noteH = [0, _textUnit * 0.8] select (_note isNotEqualTo "");
@@ -163,12 +174,12 @@ private _rowRadius = (_radius * 0.6) min (_rowH / 2);
 
     private _options = _x call _fnc_options;
     private _enabled = _options getOrDefault ["enabled", true];
-    private _rowTop = _cardY + _padY + _forEachIndex * _rowH;
+    private _rowTop = _cardY + _padY + _titleH + _forEachIndex * _rowH;
 
     // A tile: its glass, its picture, its short text, and over it the hit area that lights it and runs it.
     if (_across > 0) then {
         private _tileX = _cardX + _padX * 0.3 + (_forEachIndex mod _columns) * (_tileW + SQUARE(_tileGap));
-        private _tileY = _cardY + _padY + (floor (_forEachIndex / _columns)) * (_tileH + _tileGap);
+        private _tileY = _cardY + _padY + _titleH + (floor (_forEachIndex / _columns)) * (_tileH + _tileGap);
         private _tileRadius = _rowRadius min (_tileH / 5);
 
         [_display, _layer, [_tileX, _tileY, _tileW, _tileH], _theme getOrDefault ["slot", [1, 1, 1, 0.05]], _tileRadius] call FUNC(uiPanel);
@@ -295,6 +306,13 @@ private _rowRadius = (_radius * 0.6) min (_rowH / 2);
     };
 } forEach _choices;
 
+if (_title isNotEqualTo "") then {
+    [
+        _display, _layer, [_cardX + _padX * ([1, 0.45] select (_across > 0)), _cardY + _padY * 0.6, _width - _padX, _titleH], toUpperANSI _title, _titleSize,
+        _theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]], _font, 0, "hint"
+    ] call FUNC(uiLabel);
+};
+
 if (_note isNotEqualTo "") then {
     [
         _display, _layer, [_cardX + _padX, _cardY + _height - _padY - _noteH, _width - _padX * 2, _noteH], _note, _noteSize,
@@ -314,4 +332,4 @@ uiNamespace setVariable [QGVAR(menuFocusBack), _back];
 uiNamespace setVariable [QGVAR(menuRect), [_left, _top, _width, _height]];
 
 // What it shows, to make it again on top (fnc_raiseMenu).
-GVAR(menuState) = [_choices, [_left, _top], _across, _note];
+GVAR(menuState) = [_choices, [_left, _top], _across, _note, _title];

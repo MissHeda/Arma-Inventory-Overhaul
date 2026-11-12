@@ -41,7 +41,7 @@ private _rows = [
     ],
     ["", LLSTRING(SettingsMenu_Tiles)],
     [QGVAR(tileNames), LLSTRING(Setting_TileNames), LLSTRING(Setting_TileNames_Desc), "check", false],
-    [QGVAR(weapon3D), LLSTRING(Setting_Weapon3D), LLSTRING(Setting_Weapon3D_Desc), "check", true],
+    [QGVAR(weapon3D), LLSTRING(Setting_Weapon3D), LLSTRING(Setting_Weapon3D_Desc), "check", missionNamespace getVariable [QGVAR(weapon3DDefault), false]],
     [QGVAR(weapon3DAuto), LLSTRING(Setting_Weapon3DAuto), LLSTRING(Setting_Weapon3DAuto_Desc), "check", true],
     [
         QGVAR(weapon3DZoom_primary), LLSTRING(Setting_Weapon3D_Primary), LLSTRING(Setting_Weapon3DGroup_Desc), "group", 100, [

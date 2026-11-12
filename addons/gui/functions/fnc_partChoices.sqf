@@ -6,7 +6,7 @@
  * of the player's weapon - from the player's own gear and the loot open beside it, each with its picture and where it
  * lies, a magazine with its rounds. A click on one puts it on (fnc_doEquip: taken out where it lies, what was on the part
  * put back there - the server checks it). NONE is always the first tile and takes a part off into the gear (fnc_quickUnequip);
- * the part on it comes second, framed in the accent colour - with none on it, NONE is framed. No title: the box says what it is. That nothing fits is a note
+ * the part on it comes second, framed in the accent colour - with none on it, NONE is framed. Titled with the part it changes (0.7.13). That nothing fits is a note
  * under the tiles, never a tile. For a weapon lying in a container (fnc_weaponTile) the same, through op "fit" (fnc_doFit).
  *
  * Only what may be touched (fnc_checkTouch, a kit as Enhanced First Aid Kits says), and what the slot takes
@@ -194,4 +194,9 @@ if (_spot isNotEqualTo [] && {!isNull _group}) then {
     _at = [_cardX + _boxX, _cardY + _boxY + _boxH + pixelH * 4];
 };
 
-[_display, _choices, _at, 3, ["", LLSTRING(Modify_NoParts)] select !_found] call FUNC(openMenu);
+// Titled with the part it changes: Muzzle, Optic, Rail, Bipod, Magazine.
+private _caption = [
+    LLSTRING(Slot_Muzzle), LLSTRING(Slot_Optic), LLSTRING(Slot_Rail), LLSTRING(Slot_Bipod), LLSTRING(Slot_Magazine), LLSTRING(Slot_Magazine2)
+] param [["muzzle", "optic", "rail", "bipod", "mag", "mag2"] find _part, ""];
+
+[_display, _choices, _at, 3, ["", LLSTRING(Modify_NoParts)] select !_found, _caption] call FUNC(openMenu);

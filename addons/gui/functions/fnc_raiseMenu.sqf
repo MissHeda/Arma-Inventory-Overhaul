@@ -78,8 +78,8 @@ if ((GVAR(menuFor) param [0, ""]) isEqualTo "layout") exitWith {
     true
 };
 
-GVAR(menuState) params ["_choices", "_at", ["_across", 0], ["_note", ""]];
+GVAR(menuState) params ["_choices", "_at", ["_across", 0], ["_note", ""], ["_title", ""]];
 
-[_display, _choices, _at, _across, _note] call FUNC(openMenu);
+[_display, _choices, _at, _across, _note, _title] call FUNC(openMenu);
 
 true

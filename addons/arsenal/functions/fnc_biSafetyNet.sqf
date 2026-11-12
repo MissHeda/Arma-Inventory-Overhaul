@@ -33,6 +33,11 @@
 
     if (!hasInterface || {is3DEN}) exitWith {};
 
+    // Its start has just put every container on anew from class names (its "ListSelectCurrent" picks the worn
+    // ones, each pick re-adds them): a uniform that lay in the backpack is a new, empty one. Filled again from
+    // what was noted before the open, whatever happens to this window next (fnc_keepNested).
+    ["check"] call FUNC(keepNested);
+
     // An arsenal with a stock of its own (fnc_poolClaim): it stays, with the grid panel when its adapter asks for it.
     if ([] call FUNC(poolClaim)) exitWith {
         if (([] call (GVAR(biClaim) getOrDefault ["panel", {false}])) isEqualTo true) then {
@@ -88,6 +93,12 @@
 [missionNamespace, "arsenalPreOpen", {
     params [["_display", displayNull], ["_center", objNull, [objNull]]];
 
+    // What the uniforms, vests and backpacks in the unit's containers hold, noted before the vanilla arsenal
+    // rebuilds them, whichever arsenal ends up open (fnc_keepNested).
+    if (hasInterface && {!is3DEN}) then {
+        ["start", _center] call FUNC(keepNested);
+    };
+
     private _mode = missionNamespace getVariable [QGVAR(biArsenal), "vanilla"];
 
     if (_mode in ["vanilla", "grid"] || {!GVAR(ready)} || {[] call FUNC(poolClaim)}) then {
@@ -96,7 +107,10 @@
 }] call BIS_fnc_addScriptedEventHandler;
 
 [missionNamespace, "arsenalClosed", {
-    // The vanilla window is gone: the next open is judged anew.
+    // The vanilla window is gone: a last look at the uniforms in the containers (fnc_keepNested), and the next
+    // open is judged anew.
+    ["stop"] call FUNC(keepNested);
+
     GVAR(biLetThrough) = false;
     GVAR(biClaim) = createHashMap;
 

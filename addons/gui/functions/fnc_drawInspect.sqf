@@ -230,6 +230,11 @@ if (_show3D) then {
     _hint3DH = _textUnit * 0.75;
 };
 
+// A weapon looked at plainly in 3D: a row of buttons under the box for its view - from the left, from the right, nearer, farther,
+// reset, and whether the slot shows the view (fnc_weaponView; Mia, 0.7.13).
+private _viewRow = _show3D && {!_large} && {(getNumber (configFile >> "CfgWeapons" >> _class >> "type")) in [1, 2, 4]};
+private _viewRowH = [0, _textUnit * 0.95] select _viewRow;
+
 // The weapon's parts in a row under the picture, and how to change them under that (fnc_drawHotspots).
 private _partsH = [0, _textUnit * ([1.15, 1.35] select _large)] select (_modify isNotEqualTo "");
 private _hintModifyH = [0, _textUnit * 0.75] select (_modify isNotEqualTo "");
@@ -248,7 +253,7 @@ if (_description isNotEqualTo "" && {!_large}) then {
     ctrlDelete _probe;
 };
 
-private _height = _padY * 2 + _titleH + _gap + _pictureH + _gap + _hint3DH
+private _height = _padY * 2 + _titleH + _gap + _pictureH + _gap + _hint3DH + ([0, _viewRowH + _gap * 0.6] select _viewRow)
     + ([0, _partsH + _gap + _hintModifyH] select (_partsH > 0))
     + ([0, _descH + _gap] select (_descH > 0))
     + count _rows * _rowH;
@@ -524,6 +529,65 @@ if (_show3D) then {
     [_display, _group, [_padX, _cursor - _gap * 0.5, _innerW, _hint3DH], _hint3D, _textUnit * 0.55, _muted, _font, 2, "hint"] call FUNC(uiLabel);
 
     _cursor = _cursor + _hint3DH;
+};
+
+// The view's buttons, in the middle under the hint. "On slot" is lit while the slots show the views.
+if (_viewRow) then {
+    private _chipSize = _textUnit * 0.5;
+    private _chipGap = SQUARE(_textUnit * 0.2);
+    private _accent = (_theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]]) select [0, 3];
+    private _chipTheme = +_theme;
+
+    _chipTheme set ["radius", [0, _viewRowH * 0.3] select ((_theme getOrDefault ["radius", 0]) > 0)];
+
+    private _litTheme = +_chipTheme;
+
+    _litTheme set ["button", _accent + [1]];
+    _litTheme set ["buttonHover", _accent + [1]];
+    _litTheme set ["buttonText", _theme getOrDefault ["onAccent", [0, 0, 0, 1]]];
+
+    // [id, label, tip, lit, code]
+    private _chips = [
+        ["viewLeft", LLSTRING(Inspect_ViewLeft), LLSTRING(Inspect_ViewLeft_Tip), false, {["side", [0]] call FUNC(inspect3D)}],
+        ["viewRight", LLSTRING(Inspect_ViewRight), LLSTRING(Inspect_ViewRight_Tip), false, {["side", [180]] call FUNC(inspect3D)}],
+        ["viewOut", "-", LLSTRING(Inspect_ViewOut_Tip), false, {["zoom", [-1]] call FUNC(inspect3D)}],
+        ["viewIn", "+", LLSTRING(Inspect_ViewIn_Tip), false, {["zoom", [1]] call FUNC(inspect3D)}],
+        ["viewReset", LLSTRING(Inspect_ViewReset), LLSTRING(Inspect_ViewReset_Tip), false, {["reset"] call FUNC(inspect3D)}],
+        ["viewSlot", LLSTRING(Inspect_ViewSlot), LLSTRING(Inspect_ViewSlot_Tip), GVAR(viewApply), {
+            ["apply", "", !GVAR(viewApply)] call FUNC(weaponView);
+
+            // The card anew: the button lit or not, and the weapon as the slots show it from now on.
+            GVAR(scene3D) deleteAt "sideDir";
+            ["centre"] call FUNC(inspect3D);
+            call FUNC(drawInspect);
+        }]
+    ];
+
+    private _widths = _chips apply {
+        ([_x select 1, "", _viewRowH, _chipSize, _chipTheme] call FUNC(buttonWidth)) max SQUARE(_viewRowH * 1.3)
+    };
+    private _total = 0;
+
+    {_total = _total + _x} forEach _widths;
+
+    _total = _total + _chipGap * (count _chips - 1);
+
+    private _chipX = _padX + ((_innerW - _total) max 0) / 2;
+
+    {
+        _x params ["_id", "_label", "_tip", "_lit", "_code"];
+
+        private _chipW = _widths select _forEachIndex;
+        private _button = [
+            _display, _group, [_chipX, _cursor, _chipW, _viewRowH], _id, _label, "", [_chipTheme, _litTheme] select _lit, _code, false, _chipSize, true
+        ] call FUNC(uiButton);
+
+        [_button select -1, _tip] call FUNC(setTooltip);
+
+        _chipX = _chipX + _chipW + _chipGap;
+    } forEach _chips;
+
+    _cursor = _cursor + _viewRowH + _gap * 0.6;
 };
 
 // How to change the parts.

@@ -373,6 +373,36 @@
         <Key ID="STR_aio_gui_Inspect_Stackable">
             <English>Stackable</English>
         </Key>
+        <Key ID="STR_aio_gui_Inspect_ViewIn_Tip">
+            <English>Nearer</English>
+        </Key>
+        <Key ID="STR_aio_gui_Inspect_ViewLeft">
+            <English>Left</English>
+        </Key>
+        <Key ID="STR_aio_gui_Inspect_ViewLeft_Tip">
+            <English>Straight from the left side</English>
+        </Key>
+        <Key ID="STR_aio_gui_Inspect_ViewOut_Tip">
+            <English>Farther</English>
+        </Key>
+        <Key ID="STR_aio_gui_Inspect_ViewReset">
+            <English>Reset</English>
+        </Key>
+        <Key ID="STR_aio_gui_Inspect_ViewReset_Tip">
+            <English>Back to the plain side view - this weapon's own view goes</English>
+        </Key>
+        <Key ID="STR_aio_gui_Inspect_ViewRight">
+            <English>Right</English>
+        </Key>
+        <Key ID="STR_aio_gui_Inspect_ViewRight_Tip">
+            <English>Straight from the right side</English>
+        </Key>
+        <Key ID="STR_aio_gui_Inspect_ViewSlot">
+            <English>On slot</English>
+        </Key>
+        <Key ID="STR_aio_gui_Inspect_ViewSlot_Tip">
+            <English>The weapon's slot shows it as you turn, zoom and move it here, and the view is kept for this weapon. Off: every slot shows its weapon plainly from the side.</English>
+        </Key>
         <Key ID="STR_aio_gui_Inspect_Weight">
             <English>Weight</English>
         </Key>

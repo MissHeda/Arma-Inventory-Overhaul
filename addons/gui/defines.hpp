@@ -601,12 +601,25 @@
 #define CARD_3D_MAX_RES 1024
 #define CARD_3D_DISTANCE 0.95
 // How much of what the card shows the weapon fills, across or up and down - whichever it reaches first (fnc_cardScene).
-#define CARD_3D_ROOM 0.8
-#define CARD_3D_ROOM_LAUNCHER 0.72
-// How strong the thin frame round an attachment's plate on a weapon card is (fnc_drawEquipmentCards), 0 to 1.
+#define CARD_3D_ROOM 0.88
+#define CARD_3D_ROOM_LAUNCHER 0.78
+// How far above the weapon a card's camera stands, in degrees - and the inspect card's, where it starts as the card shows.
+#define CARD_3D_PITCH 6
+// A weapon's view with nothing of the player's own (fnc_weaponView): [turn, pitch, zoom, across, up], and how far it zooms.
+#define WEAPON_VIEW_PLAIN [0, CARD_3D_PITCH, 1, 0, 0]
+#define WEAPON_VIEW_ZOOM_MIN 0.4
+#define WEAPON_VIEW_ZOOM_MAX 5
+#define WEAPON_VIEW_MOVE 1.5
+// How strong the thin frame round an attachment's plate on a weapon card is (fnc_drawEquipmentCards), 0 to 1; how high a plate is
+// in lines of the card's name, and how far its picture stays in from the frame, as a share of the plate (Mia, 0.7.13: "the
+// pictures are too near the frame").
 #define PLATE_RING_ALPHA 0.4
+#define PLATE_LINES 1.45
+#define PLATE_INSET 0.14
 // How much of a bipod's height counts into a weapon's box: folded up it lies under the barrel (fnc_weaponBounds), in metres.
 #define BIPOD_FOLDED 0.05
+// How far an attachment reaches from its slot at most - beside it, below it, above it - in metres (fnc_weaponBounds).
+#define PART_REACH [0.1, 0.14, 0.13]
 // The shortest length a weapon card's picture is framed for, in metres: a handgun shows at a handgun's size, not card-filling.
 #define CARD_3D_MIN_LENGTH 0.75
 // How many frames a weapon is filmed before its picture is kept as a still and the scene goes.
@@ -622,9 +635,11 @@
 #define INSPECT_3D_MAX_RES 2048
 #define INSPECT_3D_FOV 0.35
 // What a scene's camera sees at a distance, up and down from the middle of its picture, as a share of that distance - across it is
-// this times the screen's shape (INSPECT_3D_ASPECT). Three quarters of the camera's FOV: measured in game on the weapon cards with
-// markers of a known distance (0.7.10).
-#define CAMERA_TAN (0.75 * INSPECT_3D_FOV)
+// this times the screen's shape (INSPECT_3D_ASPECT). The camera's FOV times the player's own field of view (fovTop of his profile,
+// getResolution): 0.75 as the game sets it - measured in game on the weapon cards with markers of a known distance, 0.7.10 -, up to
+// 1.2 for a player who widened it. Until 0.7.12 it was taken for 0.75 always: with a wide field of view the weapons came out a
+// third smaller than fitted, and the Attachments view's dots lay beside their parts (Mia, whose profile says 1.03 to 1.18).
+#define CAMERA_TAN (INSPECT_3D_FOV * (((getResolution param [6, 0.75]) max 0.3) min 3))
 // How much of the inspect card's 3D box a weapon fills where its view starts (fnc_inspect3D "centre").
 #define INSPECT_3D_ROOM 0.86
 

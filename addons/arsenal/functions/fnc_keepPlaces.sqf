@@ -33,6 +33,10 @@ private _center = (call FUNC(center));
 
 if (isNull _center || {!local _center}) exitWith {};
 
+// The uniforms, vests and backpacks lying in the containers first: one the arsenal's rebuild left empty is filled
+// again before anything of ours lays it out or gives it a fresh id (fnc_keepNested).
+["check"] call FUNC(keepNested);
+
 private _objects = [uniformContainer _center, vestContainer _center, backpackContainer _center];
 private _classes = [uniform _center, vest _center, backpack _center];
 private _due = diag_tickTime >= GVAR(keptAt);
@@ -133,6 +137,9 @@ if (_swapped isNotEqualTo [] && {GVAR(keptLoadout) isNotEqualTo []} && {diag_fra
 
         if (_added > 0) then {
             INFO_1("Another container picked in the arsenal: %1 things its load turned down were put back.",_added);
+
+            // A uniform among them comes back empty, as a class: filled from what it held (fnc_keepNested).
+            ["check"] call FUNC(keepNested);
         };
     };
 

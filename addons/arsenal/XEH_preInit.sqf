@@ -37,6 +37,13 @@ GVAR(keptAt) = 0;
 // What the soldier wore and held at that look (getUnitLoadout): what a picked container must still hold (fnc_keepPlaces).
 GVAR(keptLoadout) = [];
 
+// What the uniforms, vests and backpacks lying in the soldier's containers hold while an arsenal is open, and the
+// handler that looks at it (fnc_keepNested): both arsenals rebuild the containers from class names, which leaves
+// such a uniform empty (issue 72). [unit, per slot [container, [[object, item class, id, snapshot], ...]], lost];
+// objNull for no arsenal open.
+GVAR(nestedKept) = [objNull, [], []];
+GVAR(nestedHandler) = -1;
+
 // The last frame of the quiet time after a loadout was set on ACE's unit: until then nothing is moved out of
 // the containers (fnc_stageOverflow) and no old places are written onto them (fnc_keepPlaces).
 GVAR(loadoutFrame) = -1;
@@ -161,10 +168,17 @@ call FUNC(biInit);
 if (hasInterface) then {
     // The display: the panel moves in a frame later, and out with it.
     [QACEGVAR(arsenal,displayOpened), {
+        // What the uniforms, vests and backpacks in the soldier's containers hold, noted before ACE changes
+        // anything: picking another container sets the whole loadout again, which empties them (fnc_keepNested).
+        ["start", missionNamespace getVariable [QACEGVAR(arsenal,center), objNull]] call FUNC(keepNested);
+
         _this call FUNC(onOpened);
     }] call CBA_fnc_addEventHandler;
 
     [QACEGVAR(arsenal,displayClosed), {
+        // A last look while ACE's unit is still known, before anything of the close is done.
+        ["stop"] call FUNC(keepNested);
+
         call FUNC(onClosed);
     }] call CBA_fnc_addEventHandler;
 
@@ -174,6 +188,12 @@ if (hasInterface) then {
     // the loadout carries.
     ["CBA_loadoutSet", {
         params [["_unit", objNull, [objNull]]];
+
+        // A loadout loaded or imported is the soldier's whole gear: what lay in the old containers goes with them,
+        // and the uniforms in the new ones are noted as the loadout brought them (fnc_keepNested).
+        if (!isNull _unit && {_unit isEqualTo (GVAR(nestedKept) param [0, objNull])}) then {
+            ["start", _unit] call FUNC(keepNested);
+        };
 
         if (GVAR(attached) && {_unit isEqualTo (missionNamespace getVariable [QACEGVAR(arsenal,center), objNull])}) then {
             GVAR(kept) = [];

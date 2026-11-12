@@ -463,7 +463,7 @@ private _fnc_weaponCard = {
         // with its rounds on the same plate where it holds more than one, so each count plainly belongs to its magazine - muzzle,
         // optic, rail, bipod, magazine, second magazine from the left, drawn from the right; nothing for a part it has not.
         // [class, muzzle, rail, optic, [magazine, rounds] or [], [second magazine, rounds] or [], bipod]
-        private _partH = _lineH * 1.15;
+        private _partH = _lineH * PLATE_LINES;
         private _partW = SQUARE(_partH);
         private _partsRight = _contentX + _contentW;
         private _partsTop = _nameTop + _lineH - _partH;
@@ -486,7 +486,10 @@ private _fnc_weaponCard = {
 
             _partsRight = _partsRight - _partW - _textW;
 
-            private _partRect = [_partsRight, _partsTop, _partW, _partH];
+            // The picture in from the plate's frame.
+            private _partRect = [
+                _partsRight + _partW * PLATE_INSET, _partsTop + _partH * PLATE_INSET, _partW * (1 - PLATE_INSET * 2), _partH * (1 - PLATE_INSET * 2)
+            ];
 
             // On a real weapon picture the plates are the panel's own dark, nearly solid: a see-through film was lost on a light
             // backdrop (Mia, 0.6.109).

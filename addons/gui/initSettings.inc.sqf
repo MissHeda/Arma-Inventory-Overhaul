@@ -121,16 +121,27 @@
     {[] call FUNC(elementsChanged)}
 ] call CBA_fnc_addSetting;
 
-// Each player's own eyes and machine, on by default since 0.7.12 (Mia; off until then - a filmed picture cannot be see-through, Mia
-// 0.6.82): the weapon cards show each weapon as it really looks, with its attachments, filmed in a small 3D scene (fnc_cardScene) -
-// one camera per weapon while the window is open, with Picture-in-Picture on. Off, the flat picture with white marks. Read at
-// every build.
+// Each player's own eyes and machine: the weapon cards show each weapon as it really looks, with its attachments, filmed in a small
+// 3D scene (fnc_cardScene) - one camera per weapon while the window is open, with Picture-in-Picture on. Off, the flat picture with
+// white marks. Read at every build.
+//
+// On by default where the video options' Picture-in-Picture quality is High, Very High or Ultra, off below (Mia, 0.7.13): lower,
+// the engine draws the pictures too coarse to be worth their cost. The default follows the video options from start to start,
+// until the player sets it himself. GVAR(weapon3DDefault) is it, for the window's own settings card too (fnc_settingsDefs).
+GVAR(weapon3DDefault) = call {
+    private _options = getVideoOptions;
+    private _name = toLowerANSI (_options getOrDefault ["pipQualityName", ""]);
+    private _quality = _options getOrDefault ["pipQuality", 0];
+
+    _name in ["high", "veryhigh", "very high", "ultra"] || {_name isEqualTo "" && {_quality isEqualType 0} && {_quality >= 1024}}
+};
+
 [
     QGVAR(weapon3D),
     "CHECKBOX",
     [LLSTRING(Setting_Weapon3D), LLSTRING(Setting_Weapon3D_Desc)],
     [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
-    true,
+    GVAR(weapon3DDefault),
     0,
     {[] call FUNC(elementsChanged)}
 ] call CBA_fnc_addSetting;

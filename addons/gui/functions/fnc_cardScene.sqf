@@ -23,6 +23,8 @@
  *           [share of the picture's width the weapon may take, share of its height], [nudge across, up and down],
  *           how far above the picture's middle the weapon's middle lies, as a share of its height]) - the camera stands so far
  *           off that the whole weapon fits those shares, whatever size the layout gives the card
+ *    "view" the player's own view of a weapon changed (fnc_weaponView): its cards are fitted anew (arguments: [class], [] or
+ *           [""] for every card)
  *    "keep" only these slots' scenes stay (arguments: [slots])
  *    "stop" every scene goes
  * 1: Arguments <ARRAY> (default: [])
@@ -105,7 +107,10 @@ private _fnc_camera = {
 // The whole weapon in the middle of what the card shows, as large as it fits: the weapon's box with what it carries
 // (fnc_weaponBounds) is put in the middle of the picture and the camera stands so far off that it fills CARD_3D_ROOM of what the
 // card shows of the picture, across or up and down, whichever it reaches first (fnc_fitView). What the picture holds at a
-// distance is CAMERA_TAN of it up and down from its middle, that times the screen's shape across (measured in game, 0.7.10).
+// distance is CAMERA_TAN of it up and down from its middle, that times the screen's shape across.
+//
+// From the side, the muzzle to the left - or as the player turned, zoomed and moved this weapon in the inspect card
+// (fnc_weaponView, fnc_viewCamera; Mia, 0.7.13).
 //
 // Never closer than a weapon of CARD_3D_MIN_LENGTH would need: a handgun shows at a handgun's size, not card-filling. The card's
 // name line lies over the picture's foot: the weapon is fitted to what is free above it ("shares" is that part) and lifted into
@@ -121,17 +126,18 @@ private _fnc_fit = {
 
     (_scene getOrDefault ["shares", [1, 1]]) params [["_widthShare", 1], ["_heightShare", 1]];
 
-    private _dir = _scene get "dir";
-    private _pitch = _scene get "pitch";
     // A launcher lies a few centimetres off where its model says on the holder (the RPG-42 4 cm higher, measured in game,
     // 0.7.10): more room round it, so none of it is cut off.
     private _room = [CARD_3D_ROOM, CARD_3D_ROOM_LAUNCHER] select ((_scene get "class") isKindOf ["Launcher", configFile >> "CfgWeapons"]);
-    private _tanH = CAMERA_TAN * INSPECT_3D_ASPECT * (_widthShare max 0.05) * _room;
-    private _tanV = CAMERA_TAN * (_heightShare max 0.05) * _room;
+    private _tanH = CAMERA_TAN * INSPECT_3D_ASPECT * (_widthShare max 0.05);
+    private _tanV = CAMERA_TAN * (_heightShare max 0.05);
 
-    ([_corners, _dir, _pitch, _tanH, _tanV] call FUNC(fitView)) params ["_target", "_distance", "_across"];
+    ([
+        _corners, _scene getOrDefault ["sideDir", _scene get "dir"], ["get", _scene get "class"] call FUNC(weaponView), _tanH, _tanV, _room,
+        CARD_3D_MIN_LENGTH / (2 * _tanH * _room)
+    ] call FUNC(viewCamera)) params ["_target", "_distance", "_dir", "_pitch", "_across"];
 
-    _distance = ((_distance max (CARD_3D_MIN_LENGTH / (2 * _tanH))) max 0.2) min 8;
+    _distance = (_distance max 0.1) min 8;
 
     private _forward = [-(sin _dir) * (cos _pitch), -(cos _dir) * (cos _pitch), -(sin _pitch)];
     private _up = [-(cos _dir), sin _dir, 0] vectorCrossProduct _forward;
@@ -139,6 +145,8 @@ private _fnc_fit = {
     // Lifted into the middle of what the name line leaves free: the camera aims that much lower.
     _target = _target vectorDiff (_up vectorMultiply ((_scene getOrDefault ["lift", 0]) * 2 * CAMERA_TAN * _distance));
 
+    _scene set ["dir", _dir];
+    _scene set ["pitch", _pitch];
     _scene set ["target", _target];
     _scene set ["distance", _distance];
     _scene set ["length", _across max 0.1];
@@ -287,7 +295,7 @@ switch (_mode) do {
         _scene set ["target", +_holderPos];
         _scene set ["origin", +_holderPos];
         _scene set ["dir", 45];
-        _scene set ["pitch", 6];
+        _scene set ["pitch", CARD_3D_PITCH];
         _scene set ["frameSize", _frame];
         _scene set ["distance", ((_frame * INSPECT_3D_DISTANCE * CARD_3D_DISTANCE) max 0.25) min 6];
 
@@ -338,14 +346,16 @@ switch (_mode) do {
                 private _muzzle = ([_scene] call FUNC(weaponPoints)) getOrDefault ["muzzle", []];
 
                 // Side on to the barrel, the muzzle to the left. The camera looks along -[sin dir, cos dir], its right is
-                // [-cos dir, sin dir].
+                // [-cos dir, sin dir]. A weapon whose muzzle is not found keeps the front left for its side.
+                _scene set ["sideDir", _scene get "dir"];
+
                 if (count _muzzle == 3) then {
                     private _barrel = _muzzle vectorDiff _base;
                     _barrel set [2, 0];
 
                     if (vectorMagnitude _barrel >= 0.05) then {
                         _barrel = vectorNormalized _barrel;
-                        _scene set ["dir", (-(_barrel select 1)) atan2 (_barrel select 0)];
+                        _scene set ["sideDir", (-(_barrel select 1)) atan2 (_barrel select 0)];
                     };
                 };
 
@@ -365,6 +375,17 @@ switch (_mode) do {
         ] call CBA_fnc_waitUntilAndExecute;
 
         true
+    };
+
+    // The player's view of a weapon changed (fnc_weaponView): its cards are fitted anew - every card's without a class.
+    case "view": {
+        _arguments params [["_class", "", [""]]];
+
+        {
+            if ((_class isEqualTo "" || {(_y getOrDefault ["class", ""]) == _class}) && {_y getOrDefault ["faced", false]} && {!isNull (_y getOrDefault ["camera", objNull])}) then {
+                [_y] call _fnc_fit;
+            };
+        } forEach GVAR(cardScenes);
     };
 
     case "keep": {

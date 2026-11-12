@@ -197,6 +197,8 @@ PREP(modelBox);
 PREP(weaponPoints);
 PREP(weaponBounds);
 PREP(fitView);
+PREP(viewCamera);
+PREP(weaponView);
 PREP(drawHotspots);
 PREP(placeHotspots);
 PREP(hotspotAt);
