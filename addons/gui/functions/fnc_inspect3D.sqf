@@ -177,9 +177,9 @@ private _fnc_view = {
     true
 };
 
-// The view is the weapon's own from now on, and its card shows it (fnc_weaponView - not with "Show on slot" off).
+// The view is the weapon's own from now on, and its card shows it (fnc_weaponView - not with its "Show view on slot" off).
 private _fnc_keep = {
-    if (!GVAR(viewApply)) exitWith {};
+    if !(["shown", _scene get "class"] call FUNC(weaponView)) exitWith {};
 
     ["set", _scene get "class", _scene get "view"] call FUNC(weaponView);
     ["view", [_scene get "class"]] call FUNC(cardScene);

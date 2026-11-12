@@ -8,20 +8,22 @@
  * zoom (1 fits the weapon to the picture), move across, move up - both in half a picture's width or height], WEAPON_VIEW_PLAIN
  * for none: from the left side, fitted (fnc_viewCamera makes a camera of it).
  *
- * "Show on slot" (GVAR(viewApply), in the profile too, on by default) switches all of it off: the cards show every weapon
- * plainly, the inspect card starts plainly and keeps nothing - the views kept before stay for when it is on again.
+ * "Show view on slot", the inspect card's checkbox, switches it off for that one weapon (GVAR(viewsOff), by class, in the
+ * profile too): its card shows it plainly, the inspect card starts plainly and keeps nothing - the view kept before stays for
+ * when it is on again. Per weapon since 0.7.15: one switch for all of them took the handgun's view away with the rifle's (Mia).
  *
  * Arguments:
  * 0: What to do <STRING>
  *    "get"   the view the weapon is shown with: its own, or the plain one
  *    "set"   this view is the weapon's own from now on (the plain one: it has none any more)
- *    "apply" views are shown on the slots and kept (argument 2: true or false) - every card is drawn anew
+ *    "shown" whether the weapon's slot shows its view
+ *    "apply" the weapon's slot shows its view, and the view is kept (argument 2: true or false) - its card is drawn anew
  *    "save"  what changed goes to the profile's file (the inspect card closing)
  * 1: Weapon class <STRING> (default: "")
  * 2: "set": the view <ARRAY>; "apply": on or off <BOOL> (default: [])
  *
  * Return Value:
- * "get": the view <ARRAY>; else nothing
+ * "get": the view <ARRAY>; "shown": <BOOL>; else nothing
  *
  * Example:
  * ["get", "arifle_MX_SW_F"] call aio_gui_fnc_weaponView;
@@ -34,8 +36,12 @@ params [["_mode", "", [""]], ["_class", "", [""]], ["_value", []]];
 private _key = toLowerANSI _class;
 
 switch (_mode) do {
+    case "shown": {
+        !(_key in GVAR(viewsOff))
+    };
+
     case "get": {
-        if (!GVAR(viewApply)) exitWith {+WEAPON_VIEW_PLAIN};
+        if (_key in GVAR(viewsOff)) exitWith {+WEAPON_VIEW_PLAIN};
 
         private _view = GVAR(weaponViews) getOrDefault [_key, WEAPON_VIEW_PLAIN];
 
@@ -46,7 +52,7 @@ switch (_mode) do {
     };
 
     case "set": {
-        if (_key isEqualTo "" || {!GVAR(viewApply)} || {!(_value isEqualTypeArray WEAPON_VIEW_PLAIN)}) exitWith {};
+        if (_key isEqualTo "" || {_key in GVAR(viewsOff)} || {!(_value isEqualTypeArray WEAPON_VIEW_PLAIN)}) exitWith {};
 
         // As good as plain: none of its own.
         private _plain = true;
@@ -65,11 +71,18 @@ switch (_mode) do {
     };
 
     case "apply": {
-        GVAR(viewApply) = _value isEqualTo true;
-        profileNamespace setVariable [QGVAR(viewApply), GVAR(viewApply)];
+        if (_key isEqualTo "") exitWith {};
+
+        if (_value isEqualTo true) then {
+            GVAR(viewsOff) deleteAt _key;
+        } else {
+            GVAR(viewsOff) set [_key, true];
+        };
+
+        profileNamespace setVariable [QGVAR(weaponViewsOff), GVAR(viewsOff)];
         saveProfileNamespace;
 
-        ["view", []] call FUNC(cardScene);
+        ["view", [_class]] call FUNC(cardScene);
     };
 
     case "save": {

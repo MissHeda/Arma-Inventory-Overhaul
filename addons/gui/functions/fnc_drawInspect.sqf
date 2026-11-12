@@ -230,10 +230,11 @@ if (_show3D) then {
     _hint3DH = _textUnit * 0.75;
 };
 
-// A weapon looked at plainly in 3D: a row of buttons under the box for its view - from the left, from the right, nearer, farther,
-// reset, and whether the slot shows the view (fnc_weaponView; Mia, 0.7.13).
+// A weapon looked at plainly in 3D: buttons on the picture's foot for its view - from the left, from the right, reset - and a
+// checkbox for whether its slot shows the view (fnc_weaponView; Mia, 0.7.13 - on the picture, without the zoom buttons and with a
+// checkbox since 0.7.15: the wheel zooms).
 private _viewRow = _show3D && {!_large} && {(getNumber (configFile >> "CfgWeapons" >> _class >> "type")) in [1, 2, 4]};
-private _viewRowH = [0, _textUnit * 0.95] select _viewRow;
+private _viewRowH = [0, _textUnit * 0.85] select _viewRow;
 
 // The weapon's parts in a row under the picture, and how to change them under that (fnc_drawHotspots).
 private _partsH = [0, _textUnit * ([1.15, 1.35] select _large)] select (_modify isNotEqualTo "");
@@ -253,7 +254,7 @@ if (_description isNotEqualTo "" && {!_large}) then {
     ctrlDelete _probe;
 };
 
-private _height = _padY * 2 + _titleH + _gap + _pictureH + _gap + _hint3DH + ([0, _viewRowH + _gap * 0.6] select _viewRow)
+private _height = _padY * 2 + _titleH + _gap + _pictureH + _gap + _hint3DH
     + ([0, _partsH + _gap + _hintModifyH] select (_partsH > 0))
     + ([0, _descH + _gap] select (_descH > 0))
     + count _rows * _rowH;
@@ -390,7 +391,8 @@ if (_show3D) then {
     private _hitRects = if (_showToggle) then {
         [
             [_viewX, _viewY, (_trackX - _inset - _viewX) max 0, _belowY - _viewY],
-            [_viewX, _belowY, _viewW, _viewY + _viewH - _belowY]
+            // Not the foot of the picture where the view's buttons lie (below): held, an area would be drawn over them.
+            [_viewX, _belowY, _viewW, (_viewY + _viewH - _belowY - ([0, _viewRowH + _textUnit * 0.35] select _viewRow)) max pixelH]
         ]
     } else {
         [+_viewRect]
@@ -511,6 +513,81 @@ if (_showToggle) then {
     } forEach [["2d", LLSTRING(Inspect_2D), 0], ["3d", LLSTRING(Inspect_3D), 1]];
 };
 
+// The view's buttons on the picture's foot: from the left, from the right and reset on its left, the checkbox on its right.
+if (_viewRow && {_viewRect isNotEqualTo []}) then {
+    _viewRect params ["_viewX", "_viewY", "_viewW", "_viewH"];
+
+    private _chipSize = _textUnit * 0.48;
+    private _chipGap = SQUARE(_textUnit * 0.18);
+    private _edge = SQUARE(_textUnit * 0.3);
+    private _rowY = _viewY + _viewH - _viewRowH - _textUnit * 0.22;
+    private _accent = (_theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]]) select [0, 3];
+    private _round = (_theme getOrDefault ["radius", 0]) > 0;
+    private _chipTheme = +_theme;
+
+    // Dark on the picture, whatever lies behind them.
+    _chipTheme set ["radius", [0, _viewRowH * 0.3] select _round];
+    _chipTheme set ["button", [0, 0, 0, 0.55]];
+    _chipTheme set ["buttonHover", [0.25, 0.25, 0.25, 0.8]];
+
+    private _chipX = _viewX + _edge;
+
+    {
+        _x params ["_id", "_label", "_tip", "_code"];
+
+        private _chipW = ([_label, "", _viewRowH, _chipSize, _chipTheme] call FUNC(buttonWidth)) max SQUARE(_viewRowH * 1.3);
+        private _button = [_display, _group, [_chipX, _rowY, _chipW, _viewRowH], _id, _label, "", _chipTheme, _code, false, _chipSize, true] call FUNC(uiButton);
+
+        [_button select -1, _tip] call FUNC(setTooltip);
+
+        _chipX = _chipX + _chipW + _chipGap;
+    } forEach [
+        ["viewLeft", LLSTRING(Inspect_ViewLeft), LLSTRING(Inspect_ViewLeft_Tip), {["side", [0]] call FUNC(inspect3D)}],
+        ["viewRight", LLSTRING(Inspect_ViewRight), LLSTRING(Inspect_ViewRight_Tip), {["side", [180]] call FUNC(inspect3D)}],
+        ["viewReset", LLSTRING(Inspect_ViewReset), LLSTRING(Inspect_ViewReset_Tip), {["reset"] call FUNC(inspect3D)}]
+    ];
+
+    // The checkbox, as the settings' are: a box in the accent colour with its tick while it is on, its words beside it - on a
+    // dark plate, and the whole plate takes the click.
+    private _shown = ["shown", _class] call FUNC(weaponView);
+    private _label = LLSTRING(Inspect_ViewSlot);
+    private _boxH = _viewRowH * 0.6;
+    private _boxW = SQUARE(_boxH);
+    private _labelW = (_label getTextWidth [_font, _chipSize]) * TEXT_SLACK;
+    private _plateW = _boxW + _labelW + SQUARE(_viewRowH * 0.25) * 3;
+    private _plateX = _viewX + _viewW - _edge - _plateW;
+    private _boxX = _plateX + SQUARE(_viewRowH * 0.25);
+
+    [_display, _group, [_plateX, _rowY, _plateW, _viewRowH], [0, 0, 0, 0.55], [0, _viewRowH * 0.3] select _round] call FUNC(uiPanel);
+    [_display, _group, [_boxX, _rowY + (_viewRowH - _boxH) / 2, _boxW, _boxH], [[1, 1, 1, 0.16], _accent + [1]] select _shown, _boxH * 0.2] call FUNC(uiPanel);
+
+    if (_shown) then {
+        [_display, _group, [_boxX, _rowY + (_viewRowH - _boxH) / 2, _boxW, _boxH], UI_TEX(icon_check_ca), [1, 1, 1, 1]] call FUNC(uiIcon);
+    };
+
+    [
+        _display, _group, [_boxX + _boxW + SQUARE(_viewRowH * 0.25), _rowY, _labelW, _viewRowH], _label, _chipSize, _colorText, _font, 0, "hint"
+    ] call FUNC(uiLabel);
+
+    private _check = [_display, "AIO_Hitbox", _group, [_plateX, _rowY, _plateW, _viewRowH]] call FUNC(uiCreate);
+
+    [_check, LLSTRING(Inspect_ViewSlot_Tip)] call FUNC(setTooltip);
+    _check ctrlAddEventHandler ["ButtonClick", {
+        [{
+            private _class = GVAR(inspect) param [0, "", [""]];
+
+            if (_class isEqualTo "") exitWith {};
+
+            ["apply", _class, !(["shown", _class] call FUNC(weaponView))] call FUNC(weaponView);
+
+            // The card anew: the box ticked or not, and the weapon as its slot shows it from now on.
+            GVAR(scene3D) deleteAt "sideDir";
+            ["centre"] call FUNC(inspect3D);
+            call FUNC(drawInspect);
+        }] call FUNC(later);
+    }];
+};
+
 _cursor = _cursor + _pictureH + _gap;
 
 // The weapon's parts: on the 3D picture and in a row under it (fnc_drawHotspots). No point on the switch.
@@ -529,65 +606,6 @@ if (_show3D) then {
     [_display, _group, [_padX, _cursor - _gap * 0.5, _innerW, _hint3DH], _hint3D, _textUnit * 0.55, _muted, _font, 2, "hint"] call FUNC(uiLabel);
 
     _cursor = _cursor + _hint3DH;
-};
-
-// The view's buttons, in the middle under the hint. "On slot" is lit while the slots show the views.
-if (_viewRow) then {
-    private _chipSize = _textUnit * 0.5;
-    private _chipGap = SQUARE(_textUnit * 0.2);
-    private _accent = (_theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]]) select [0, 3];
-    private _chipTheme = +_theme;
-
-    _chipTheme set ["radius", [0, _viewRowH * 0.3] select ((_theme getOrDefault ["radius", 0]) > 0)];
-
-    private _litTheme = +_chipTheme;
-
-    _litTheme set ["button", _accent + [1]];
-    _litTheme set ["buttonHover", _accent + [1]];
-    _litTheme set ["buttonText", _theme getOrDefault ["onAccent", [0, 0, 0, 1]]];
-
-    // [id, label, tip, lit, code]
-    private _chips = [
-        ["viewLeft", LLSTRING(Inspect_ViewLeft), LLSTRING(Inspect_ViewLeft_Tip), false, {["side", [0]] call FUNC(inspect3D)}],
-        ["viewRight", LLSTRING(Inspect_ViewRight), LLSTRING(Inspect_ViewRight_Tip), false, {["side", [180]] call FUNC(inspect3D)}],
-        ["viewOut", "-", LLSTRING(Inspect_ViewOut_Tip), false, {["zoom", [-1]] call FUNC(inspect3D)}],
-        ["viewIn", "+", LLSTRING(Inspect_ViewIn_Tip), false, {["zoom", [1]] call FUNC(inspect3D)}],
-        ["viewReset", LLSTRING(Inspect_ViewReset), LLSTRING(Inspect_ViewReset_Tip), false, {["reset"] call FUNC(inspect3D)}],
-        ["viewSlot", LLSTRING(Inspect_ViewSlot), LLSTRING(Inspect_ViewSlot_Tip), GVAR(viewApply), {
-            ["apply", "", !GVAR(viewApply)] call FUNC(weaponView);
-
-            // The card anew: the button lit or not, and the weapon as the slots show it from now on.
-            GVAR(scene3D) deleteAt "sideDir";
-            ["centre"] call FUNC(inspect3D);
-            call FUNC(drawInspect);
-        }]
-    ];
-
-    private _widths = _chips apply {
-        ([_x select 1, "", _viewRowH, _chipSize, _chipTheme] call FUNC(buttonWidth)) max SQUARE(_viewRowH * 1.3)
-    };
-    private _total = 0;
-
-    {_total = _total + _x} forEach _widths;
-
-    _total = _total + _chipGap * (count _chips - 1);
-
-    private _chipX = _padX + ((_innerW - _total) max 0) / 2;
-
-    {
-        _x params ["_id", "_label", "_tip", "_lit", "_code"];
-
-        private _chipW = _widths select _forEachIndex;
-        private _button = [
-            _display, _group, [_chipX, _cursor, _chipW, _viewRowH], _id, _label, "", [_chipTheme, _litTheme] select _lit, _code, false, _chipSize, true
-        ] call FUNC(uiButton);
-
-        [_button select -1, _tip] call FUNC(setTooltip);
-
-        _chipX = _chipX + _chipW + _chipGap;
-    } forEach _chips;
-
-    _cursor = _cursor + _viewRowH + _gap * 0.6;
 };
 
 // How to change the parts.
@@ -626,9 +644,13 @@ if (_descH > 0) then {
             [_valueText, _innerW * 0.3 - SQUARE(_textUnit * 0.3), _font, _textUnit * 0.58] call FUNC(fitText), _textUnit * 0.58, _colorText, _font, 1, "value"
         ] call FUNC(uiLabel);
     } else {
+        // All the room its label leaves: a mod's long name was cut off after 60 % of the card ("Advanced Combat Environment 3....",
+        // Mia, 0.7.15).
+        private _labelW = (((_label getTextWidth [_font, _textUnit * 0.58]) * TEXT_SLACK + SQUARE(_textUnit * 0.6)) min (_innerW * 0.4));
+
         [
-            _display, _group, [_padX + _innerW * 0.4, _rowTop, _innerW * 0.6, _rowH],
-            [_value, _innerW * 0.6, _font, _textUnit * 0.58] call FUNC(fitText), _textUnit * 0.58, _colorText, _font, 1, "value"
+            _display, _group, [_padX + _labelW, _rowTop, _innerW - _labelW, _rowH],
+            [_value, _innerW - _labelW, _font, _textUnit * 0.58] call FUNC(fitText), _textUnit * 0.58, _colorText, _font, 1, "value"
         ] call FUNC(uiLabel);
     };
 } forEach _rows;

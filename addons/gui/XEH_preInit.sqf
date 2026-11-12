@@ -314,14 +314,20 @@ GVAR(inspectMove) = [];
 GVAR(inspectView) = profileNamespace getVariable [QGVAR(inspectView), "2d"];
 GVAR(scene3D) = createHashMap;
 
-// Each player's own views of his weapons, by class, and whether the slots show them (fnc_weaponView) - both from his profile.
+// Each player's own views of his weapons, by class, and the weapons whose slot does not show theirs (fnc_weaponView) - both from
+// his profile.
 GVAR(weaponViews) = profileNamespace getVariable [QGVAR(weaponViews), createHashMap];
 
 if !(GVAR(weaponViews) isEqualType createHashMap) then {
     GVAR(weaponViews) = createHashMap;
 };
 
-GVAR(viewApply) = (profileNamespace getVariable [QGVAR(viewApply), true]) isEqualTo true;
+GVAR(viewsOff) = profileNamespace getVariable [QGVAR(weaponViewsOff), createHashMap];
+
+if !(GVAR(viewsOff) isEqualType createHashMap) then {
+    GVAR(viewsOff) = createHashMap;
+};
+
 GVAR(viewsDirty) = false;
 GVAR(inspect3DTurn) = [];
 GVAR(inspect3DPan) = [];

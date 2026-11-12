@@ -2,6 +2,15 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.7.15 - beta
+
+### Changed
+
+- Inspect in 3D: the view's buttons lie on the picture's foot now - Left, Right, Reset - without the zoom buttons (the
+  wheel zooms), and "Show view on slot" is a checkbox that counts for the weapon looked at alone, no longer for
+  every weapon.
+- Inspect card: a long value has all the room its label leaves - a mod's long name is no longer cut off.
+
 ## 0.7.14 - beta
 
 ### Fixed
