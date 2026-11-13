@@ -1099,7 +1099,7 @@ call {
             };
 
             // A magazine or attachment on the weapon itself goes on the part that takes it - loaded at once.
-            if (!_fits && {!_tilePart} && {_dragGroup isEqualTo []} && {_slot in ["primary", "handgun", "launcher", "primary2"]}) then {
+            if (!_fits && {!_tilePart} && {_dragGroup isEqualTo []} && {_slot in ["primary", "handgun", "launcher", "primary2", "handgun2"]}) then {
                 private _part = [GVAR(unit), _slot, _entry get "class"] call EFUNC(storage,partFor);
 
                 if (_part isNotEqualTo "") then {
@@ -1139,7 +1139,7 @@ call {
             (_record param [5, ""]) isNotEqualTo "" && {(_record param [7, -1]) < 0} && {!isNull _owner}
             && {
                 _owner isNotEqualTo (_slotSource select 0)
-                || {[_slotSource select 1, _record param [5, ""]] in [["primary", "primary2"], ["primary2", "primary"]]}
+                || {[_slotSource select 1, _record param [5, ""]] in [["primary", "primary2"], ["primary2", "primary"], ["handgun", "handgun2"], ["handgun2", "handgun"]]}
             }
         };
 

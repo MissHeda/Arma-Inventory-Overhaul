@@ -2,6 +2,15 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.7.17 - beta
+
+### Added
+
+- KJW's Two Secondary Weapons: the second handgun has a card of its own under the handgun, "Second handgun" - put a
+  handgun there by drag, double click (with one in hand already) or the menu, change its attachments and magazine, swap
+  it with the handgun, and that mod's key draws it as one it holstered itself. Its weight is counted by this mod, as
+  with KJW's Two Primary Weapons (#75). Tested in game.
+
 ## 0.7.16 - beta
 
 ### Added

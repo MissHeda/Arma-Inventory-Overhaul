@@ -38,14 +38,17 @@ if (commandingMenu isNotEqualTo "") exitWith {false};
 
 // The two-primary mod's switch key (KJW's and WebKnight's both default to 4, the first slot's key): the key is
 // theirs, the slot does nothing - both at once broke the swap (Discord report, 0.7.2).
-private _switch = (missionNamespace getVariable [QEGVAR(storage,secondPrimaryMod), createHashMap]) getOrDefault ["keybind", []];
+// KJW's Two Secondary Weapons' key (default 5) the same way.
+{
+    private _switch = (missionNamespace getVariable [_x, createHashMap]) getOrDefault ["keybind", []];
 
-if (_switch isNotEqualTo []) then {
-    private _theirs = (_switch call CBA_fnc_getKeybind) param [8, []];
-    private _ours = ([CBA_SETTINGS_AIO, format [QGVAR(slot%1), _index + 1]] call CBA_fnc_getKeybind) param [8, []];
+    if (_switch isNotEqualTo [] && {_index >= 0}) then {
+        private _theirs = (_switch call CBA_fnc_getKeybind) param [8, []];
+        private _ours = ([CBA_SETTINGS_AIO, format [QGVAR(slot%1), _index + 1]] call CBA_fnc_getKeybind) param [8, []];
 
-    if (_ours findIf {_x in _theirs && {(_x param [0, 0]) > 0}} >= 0) then {_index = -1};
-};
+        if (_ours findIf {_x in _theirs && {(_x param [0, 0]) > 0}} >= 0) then {_index = -1};
+    };
+} forEach [QEGVAR(storage,secondPrimaryMod), QEGVAR(storage,secondHandgunMod)];
 
 if (_index < 0) exitWith {false};
 if (!isNull curatorCamera || {(call CBA_fnc_getActiveFeatureCamera) isNotEqualTo ""}) exitWith {false};

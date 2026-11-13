@@ -499,8 +499,14 @@
         <Key ID="STR_aio_gui_Menu_Settings">
             <English>Settings for %1</English>
         </Key>
+        <Key ID="STR_aio_gui_Menu_SwapHandgun">
+            <English>Swap with handgun</English>
+        </Key>
         <Key ID="STR_aio_gui_Menu_SwapPrimary">
             <English>Swap with primary</English>
+        </Key>
+        <Key ID="STR_aio_gui_Menu_SwapSecondHandgun">
+            <English>Swap with second handgun</English>
         </Key>
         <Key ID="STR_aio_gui_Menu_SwapSecondPrimary">
             <English>Swap with second primary</English>
@@ -1308,6 +1314,9 @@ Off does it at once; a drag never waits.</English>
         <Key ID="STR_aio_gui_Setting_Weapon3DOffsetX_Handgun">
             <English>Weapon picture left/right: handgun</English>
         </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3DOffsetX_Handgun2">
+            <English>Weapon picture left/right: second handgun</English>
+        </Key>
         <Key ID="STR_aio_gui_Setting_Weapon3DOffsetX_Launcher">
             <English>Weapon picture left/right: launcher</English>
         </Key>
@@ -1322,6 +1331,9 @@ Off does it at once; a drag never waits.</English>
         </Key>
         <Key ID="STR_aio_gui_Setting_Weapon3DOffsetY_Handgun">
             <English>Weapon picture up/down: handgun</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3DOffsetY_Handgun2">
+            <English>Weapon picture up/down: second handgun</English>
         </Key>
         <Key ID="STR_aio_gui_Setting_Weapon3DOffsetY_Launcher">
             <English>Weapon picture up/down: launcher</English>
@@ -1338,6 +1350,9 @@ Off does it at once; a drag never waits.</English>
         <Key ID="STR_aio_gui_Setting_Weapon3DZoom_Handgun">
             <English>Weapon picture size: handgun</English>
         </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3DZoom_Handgun2">
+            <English>Weapon picture size: second handgun</English>
+        </Key>
         <Key ID="STR_aio_gui_Setting_Weapon3DZoom_Launcher">
             <English>Weapon picture size: launcher</English>
         </Key>
@@ -1352,6 +1367,9 @@ Off does it at once; a drag never waits.</English>
         </Key>
         <Key ID="STR_aio_gui_Setting_Weapon3D_Handgun">
             <English>Weapon picture: handgun</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3D_Handgun2">
+            <English>Weapon picture: second handgun</English>
         </Key>
         <Key ID="STR_aio_gui_Setting_Weapon3D_Launcher">
             <English>Weapon picture: launcher</English>
@@ -1496,6 +1514,9 @@ Off does it at once; a drag never waits.</English>
         </Key>
         <Key ID="STR_aio_gui_Slot_Rail">
             <English>Rail</English>
+        </Key>
+        <Key ID="STR_aio_gui_Slot_SecondHandgun">
+            <English>Second handgun</English>
         </Key>
         <Key ID="STR_aio_gui_Slot_SecondPrimary">
             <English>Second primary</English>

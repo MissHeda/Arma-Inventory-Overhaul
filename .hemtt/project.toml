@@ -41,6 +41,7 @@ workshop = [
     "3475006113", # Ukraine FPV Drone, for the compat_fpv addon
     "2976569274", # WebKnight's Two Primary Weapons, for the compat_wbk_twoprimary addon
     # "2893363164", # KJW's Two Primary Weapons, for the compat_kjw_twoprimary addon (instead of WebKnight's, not with it)
+    # "3018159841", # KJW's Two Secondary Weapons, for the compat_kjw_twosecondary addon
 ]
 
 # With GreenMag Rework, for the compat_greenmag addon - built locally, not on the Workshop: its last `hemtt dev` (run there

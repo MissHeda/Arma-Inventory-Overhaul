@@ -72,6 +72,10 @@ GVAR(compatSets) = createHashMap;
 // action] of the mod's own switch key, which the weapon card names (aio_gui_fnc_drawEquipmentCards).
 GVAR(secondPrimaryMod) = createHashMap;
 
+// The same for the second handgun that KJW's Two Secondary Weapons keeps outside the loadout ("handgun2"; its compat
+// addon fills it, with the same keys; fnc_secondPrimary and fnc_setSecondPrimary with the slot "handgun2").
+GVAR(secondHandgunMod) = createHashMap;
+
 // Where a unit's uniform, vest and backpack keep their things travels inside its loadouts, in the extended
 // info CBA keeps with them: written when a loadout is read, read back when one is set (fnc_onLoadoutGet,
 // fnc_onLoadoutSet). On every machine - a loadout is set where the code that sets it runs, and the Eden

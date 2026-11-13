@@ -423,16 +423,21 @@ if !(GVAR(sortMode) isEqualType "" && {GVAR(sortMode) in SORT_MODES}) then {
 uiNamespace setVariable [QGVAR(sortButtons), []];
 
 // The order of the weapon cards in the equipment column, top down (fnc_drawEquipmentCards): each player's own,
-// kept in the profile, changed by holding a card's header and moving it (fnc_cardGrip). An order that does not name
-// each of the four once - an older or a broken one - is the default again.
+// kept in the profile, changed by holding a card's header and moving it (fnc_cardGrip). An order from before the second
+// handgun (0.7.17) gets it after the handgun; one that does not name each of the five once - a broken one - is the default.
 GVAR(weaponOrder) = profileNamespace getVariable [QGVAR(weaponOrder), []];
+
+if (GVAR(weaponOrder) isEqualType [] && {!("handgun2" in GVAR(weaponOrder))} && {"handgun" in GVAR(weaponOrder)}) then {
+    GVAR(weaponOrder) = +GVAR(weaponOrder);
+    GVAR(weaponOrder) insert [(GVAR(weaponOrder) find "handgun") + 1, ["handgun2"]];
+};
 
 if !(GVAR(weaponOrder) isEqualType [] && {
     private _sorted = +GVAR(weaponOrder);
     _sorted sort true;
-    _sorted isEqualTo ["handgun", "launcher", "primary", "primary2"]
+    _sorted isEqualTo ["handgun", "handgun2", "launcher", "primary", "primary2"]
 }) then {
-    GVAR(weaponOrder) = ["primary", "primary2", "handgun", "launcher"];
+    GVAR(weaponOrder) = ["primary", "primary2", "handgun", "handgun2", "launcher"];
 };
 
 // A hold on a weapon card's header that lifted the card took its release's click (fnc_cardGrip): the slot of that

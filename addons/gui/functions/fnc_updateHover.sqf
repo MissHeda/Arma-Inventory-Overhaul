@@ -928,7 +928,7 @@ switch (_shown param [0, ""]) do {
                 if (_worn isNotEqualTo [] && {(_worn select 0) == _class}) exitWith {
                     _weapon = _worn;
                 };
-            } forEach ["primary", "handgun", "launcher", "primary2", "binocular"];
+            } forEach ["primary", "handgun", "launcher", "primary2", "handgun2", "binocular"];
         };
 
         if (_weapon isNotEqualTo []) then {
@@ -943,7 +943,7 @@ switch (_shown param [0, ""]) do {
         // its attachments (fnc_onMouseButton, fnc_inspect).
         if (
             [] call FUNC(isInventoryMode) && {_class isNotEqualTo ""} && {(_record param [6, objNull]) isEqualTo GVAR(unit)}
-            && {(_record param [5, ""]) in ["primary", "handgun", "launcher", "primary2"]}
+            && {(_record param [5, ""]) in ["primary", "handgun", "launcher", "primary2", "handgun2"]}
         ) then {
             _double = LLSTRING(Menu_Modify);
         };

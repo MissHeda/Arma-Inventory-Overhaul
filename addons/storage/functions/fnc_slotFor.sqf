@@ -21,7 +21,16 @@ params [["_unit", objNull, [objNull]], ["_class", "", [""]]];
 
 private _kind = ([_class] call EFUNC(items,getInfo)) get "kind";
 
-if (_kind in ["handgun", "launcher", "binocular", "headgear", "goggles", "nvg", "uniform", "vest", "backpack", "map", "gps", "radio", "compass", "watch"]) exitWith {_kind};
+// A handgun the same way: with one in hand and the second handgun's place empty, there (KJW's Two Secondary Weapons).
+if (_kind isEqualTo "handgun") exitWith {
+    ([_unit, "handgun2"] call FUNC(secondPrimary)) params ["_hasSecond", "_second"];
+
+    if (handgunWeapon _unit isNotEqualTo "" && {_hasSecond} && {_second isEqualTo []} && {[_unit, "handgun2", _class] call FUNC(slotAccepts)}) exitWith {"handgun2"};
+
+    "handgun"
+};
+
+if (_kind in ["launcher", "binocular", "headgear", "goggles", "nvg", "uniform", "vest", "backpack", "map", "gps", "radio", "compass", "watch"]) exitWith {_kind};
 // A rifle into the hands - or, with them full and a two-primary mod's back empty, onto the back as the
 // second primary (fnc_secondPrimary), as EVEN Better Inventory does: a double click on a second rifle keeps
 // the one in hand.
@@ -46,6 +55,6 @@ if (_kind in ["muzzle", "optic", "rail", "bipod", "magazine", "grenade"]) then {
     _slot = [_unit, _x, _class, _equipment] call FUNC(partFor);
 
     if (_slot isNotEqualTo "") exitWith {};
-} forEach ["primary", "handgun", "launcher", "primary2"];
+} forEach ["primary", "handgun", "launcher", "primary2", "handgun2"];
 
 _slot

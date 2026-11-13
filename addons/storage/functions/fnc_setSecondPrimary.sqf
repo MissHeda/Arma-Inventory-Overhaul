@@ -13,6 +13,7 @@
  * 0: Unit <OBJECT>
  * 1: Weapon, [class, muzzle, rail, optic, [magazine, rounds] or [], [second magazine, rounds] or [], bipod], or []
  *    to leave the back empty <ARRAY>
+ * 2: Slot - "primary2", or "handgun2" for the second handgun <STRING> (default: "primary2")
  *
  * Return Value:
  * The back holds it now - or is empty, for [] <BOOL>
@@ -23,11 +24,12 @@
  * Public: Yes
  */
 
-params [["_unit", objNull, [objNull]], ["_weapon", [], [[]]]];
+params [["_unit", objNull, [objNull]], ["_weapon", [], [[]]], ["_slot", "primary2", [""]]];
 
-private _set = GVAR(secondPrimaryMod) getOrDefault ["set", {}];
+// The second handgun (KJW's Two Secondary Weapons): its own compat addon, GVAR(secondHandgunMod).
+private _set = ([GVAR(secondPrimaryMod), GVAR(secondHandgunMod)] select (_slot isEqualTo "handgun2")) getOrDefault ["set", {}];
 
-if (isNull _unit || {_set isEqualTo {}} || {!(([_unit] call FUNC(secondPrimary)) select 0)}) exitWith {false};
+if (isNull _unit || {_set isEqualTo {}} || {!(([_unit, _slot] call FUNC(secondPrimary)) select 0)}) exitWith {false};
 
 if (_weapon isNotEqualTo []) then {
     _weapon = [_weapon] call FUNC(normalizeWeapon);
@@ -35,7 +37,7 @@ if (_weapon isNotEqualTo []) then {
 
 [_unit, +_weapon] call _set;
 
-private _now = ([_unit] call FUNC(secondPrimary)) select 1;
+private _now = ([_unit, _slot] call FUNC(secondPrimary)) select 1;
 
 if (_weapon isEqualTo []) exitWith {_now isEqualTo []};
 

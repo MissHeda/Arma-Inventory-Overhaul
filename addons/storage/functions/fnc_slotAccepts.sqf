@@ -47,6 +47,13 @@ if (_slotId isEqualTo "primary2") exitWith {
     && {[_unit, _class] call (GVAR(secondPrimaryMod) getOrDefault ["accepts", {true}])}
 };
 
+// The second handgun (KJW's Two Secondary Weapons): a handgun, the same way.
+if (_slotId isEqualTo "handgun2") exitWith {
+    _kind isEqualTo "handgun"
+    && {(_equipment getOrDefault ["handgun2", -1]) isEqualType [] || {([_unit, "handgun2"] call FUNC(secondPrimary)) select 0}}
+    && {[_unit, _class] call (GVAR(secondHandgunMod) getOrDefault ["accepts", {true}])}
+};
+
 if (_part isEqualTo "") exitWith {
     _kind isEqualTo (switch (_base) do {
         case "primary": {"rifle"};

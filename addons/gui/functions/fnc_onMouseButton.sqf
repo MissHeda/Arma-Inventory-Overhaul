@@ -532,7 +532,7 @@ private _clickKey = [_gridIndex, _tileIndex];
 private _ownWeapon = !_listening && {!_ctrl} && {!_ctrlAtPress} && {!_alt} && {!_altAtPress} && {!_shift} && {
     _slotSource params [["_slotOwner", objNull], ["_slotName", ""]];
 
-    _slotOwner isEqualTo GVAR(unit) && {_slotName in ["primary", "handgun", "launcher", "primary2"]}
+    _slotOwner isEqualTo GVAR(unit) && {_slotName in ["primary", "handgun", "launcher", "primary2", "handgun2"]}
 };
 
 if (_ownWeapon) then {

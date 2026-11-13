@@ -15,6 +15,7 @@
  *       "nvg" - class name, "" when the slot is empty <STRING>
  *   "primary2" - the second primary on the back, as the weapons, [] when empty - only on a unit that has
  *       that slot: with WebKnight's or KJW's Two Primary Weapons loaded (fnc_secondPrimary) <ARRAY>
+ *   "handgun2" - the second handgun, the same way, with KJW's Two Secondary Weapons loaded <ARRAY>
  *
  * Example:
  * [player] call aio_storage_fnc_getEquipment;
@@ -78,6 +79,13 @@ private _equipment = createHashMapFromArray [
 
 if (_hasSecond) then {
     _equipment set ["primary2", _second];
+};
+
+// And the second handgun of KJW's Two Secondary Weapons.
+([_unit, "handgun2"] call FUNC(secondPrimary)) params ["_hasHandgun2", "_handgun2"];
+
+if (_hasHandgun2) then {
+    _equipment set ["handgun2", _handgun2];
 };
 
 _equipment

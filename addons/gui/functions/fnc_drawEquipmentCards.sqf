@@ -146,11 +146,19 @@ private _gearSection = _showGear || _showSmall;
 private _second = _equipment getOrDefault ["primary2", -1];
 private _hasSecond = _second isEqualType [];
 
+// And one for the second handgun, when KJW's Two Secondary Weapons gives the unit that slot.
+private _secondHandgun = _equipment getOrDefault ["handgun2", -1];
+private _hasSecondHandgun = _secondHandgun isEqualType [];
+
 // The weapon cards in the player's order (GVAR(weaponOrder)), and which of them are folded to their header: as the
 // player chose (GVAR(weaponFolds)), or until then the second primary while nothing is on the back.
-private _shownOrder = [[], GVAR(weaponOrder) select {_x isNotEqualTo "primary2" || _hasSecond}] select _showWeapons;
+private _shownOrder = [[], GVAR(weaponOrder) select {
+    (_x isNotEqualTo "primary2" || _hasSecond) && {_x isNotEqualTo "handgun2" || _hasSecondHandgun}
+}] select _showWeapons;
 private _cards = count _shownOrder;
-private _foldedSlots = _shownOrder select {GVAR(weaponFolds) getOrDefault [_x, _x isEqualTo "primary2" && {_second isEqualTo []}]};
+private _foldedSlots = _shownOrder select {GVAR(weaponFolds) getOrDefault [
+    _x, (_x isEqualTo "primary2" && {_second isEqualTo []}) || {_x isEqualTo "handgun2" && {_secondHandgun isEqualTo []}}
+]};
 private _open = _cards - count _foldedSlots;
 
 // Each card has its header line above it, whatever the theme's captions - with a little air under it.
@@ -563,8 +571,9 @@ private _fnc_weaponRow = {
     private _class = _weapon param [0, "", [""]];
     private _cardY = _rowTop + _headH;
 
-    // The second primary hangs on the back: never in hand, even of the same class as the one that is.
-    private _inHand = _class isNotEqualTo "" && {_slot isNotEqualTo "primary2"} && {!isNull _unit} && {currentWeapon _unit == _class};
+    // The second primary hangs on the back, the second handgun in its holster: never in hand, even of the same class as the one
+    // that is.
+    private _inHand = _class isNotEqualTo "" && {!(_slot in ["primary2", "handgun2"])} && {!isNull _unit} && {currentWeapon _unit == _class};
 
     [_rowTop, _slot, _caption, _number, _inHand, _rowFolded, _class] call _fnc_weaponHeader;
 
@@ -634,10 +643,12 @@ if (_showWeapons) then {
 
 // The second primary's corner names the two-primary mod's own key that switches to it - when that key is short
 // enough for the cap (a key with modifiers is left off).
-private _keyName = "";
+// The same for the second handgun and KJW's Two Secondary Weapons' key.
+private _fnc_keyName = {
+    params ["_mod"];
 
-if (_hasSecond) then {
-    private _keybind = EGVAR(storage,secondPrimaryMod) getOrDefault ["keybind", []];
+    private _name = "";
+    private _keybind = _mod getOrDefault ["keybind", []];
 
     if (_keybind isNotEqualTo [] && {!isNil "CBA_fnc_getKeybind"}) then {
         private _entry = _keybind call CBA_fnc_getKeybind;
@@ -647,19 +658,21 @@ if (_hasSecond) then {
         ((_entry param [8, []]) param [0, []]) params [["_key", 0, [0]], ["_modifiers", [], [[]]]];
 
         if (_key > 0 && {!(true in _modifiers)}) then {
-            _keyName = [_key, _modifiers] call CBA_fnc_localizeKey;
+            _name = [_key, _modifiers] call CBA_fnc_localizeKey;
         };
     };
 
-    if (count _keyName > 2) then {
-        _keyName = "";
-    };
+    [_name, ""] select (count _name > 2)
 };
+
+private _keyName = ["", [EGVAR(storage,secondPrimaryMod)] call _fnc_keyName] select _hasSecond;
+private _keyNameHandgun = ["", [EGVAR(storage,secondHandgunMod)] call _fnc_keyName] select _hasSecondHandgun;
 
 private _rows = createHashMapFromArray [
     ["primary", [LLSTRING(Slot_Primary), GEAR_ICON(ui_gear_primary_gs), "1"]],
     ["primary2", [LLSTRING(Slot_SecondPrimary), GEAR_ICON(ui_gear_primary_gs), _keyName]],
     ["handgun", [LLSTRING(Slot_Handgun), GEAR_ICON(ui_gear_hgun_gs), "2"]],
+    ["handgun2", [LLSTRING(Slot_SecondHandgun), GEAR_ICON(ui_gear_hgun_gs), _keyNameHandgun]],
     ["launcher", [LLSTRING(Slot_Launcher), GEAR_ICON(ui_gear_secondary_gs), "3"]]
 ];
 

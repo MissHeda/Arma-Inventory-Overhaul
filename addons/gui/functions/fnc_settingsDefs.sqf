@@ -71,6 +71,13 @@ private _rows = [
             [QGVAR(weapon3DOffsetY_primary2), "Y", -50, 50, 5, "%", 0, LLSTRING(Setting_Weapon3DOffsetY_Desc)]
         ]
     ],
+    [
+        QGVAR(weapon3DZoom_handgun2), LLSTRING(Setting_Weapon3D_Handgun2), LLSTRING(Setting_Weapon3DGroup_Desc), "group", 100, [
+            [QGVAR(weapon3DZoom_handgun2), LLSTRING(Weapon3D_Size), 50, 200, 5, "%", 100, LLSTRING(Setting_Weapon3DZoom_Desc)],
+            [QGVAR(weapon3DOffsetX_handgun2), "X", -50, 50, 5, "%", 0, LLSTRING(Setting_Weapon3DOffsetX_Desc)],
+            [QGVAR(weapon3DOffsetY_handgun2), "Y", -50, 50, 5, "%", 0, LLSTRING(Setting_Weapon3DOffsetY_Desc)]
+        ]
+    ],
     [QGVAR(compareTooltip), LLSTRING(Setting_CompareTooltip), LLSTRING(Setting_CompareTooltip_Desc), "check", true],
     [QGVAR(magazineFillBar), LLSTRING(Setting_MagazineFillBar), LLSTRING(Setting_MagazineFillBar_Desc), "check", true],
     [QGVAR(magazineText), LLSTRING(Setting_MagazineText), LLSTRING(Setting_MagazineText_Desc), "check", true],

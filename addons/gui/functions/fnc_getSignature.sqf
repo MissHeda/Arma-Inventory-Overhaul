@@ -89,9 +89,9 @@ for "_i" from 3 to 5 do {
     };
 };
 
-// And the second primary on the back, which a two-primary mod keeps outside the loadout
+// And the second primary on the back and the second handgun, which a two-weapons mod keeps outside the loadout
 // (aio_storage_fnc_secondPrimary): put there or taken off, it changes nothing the loadout shows.
-private _own = str [_loadout, [GVAR(unit)] call EFUNC(storage,secondPrimary)];
+private _own = str [_loadout, [GVAR(unit)] call EFUNC(storage,secondPrimary), [GVAR(unit), "handgun2"] call EFUNC(storage,secondPrimary)];
 
 // ----- List -----
 

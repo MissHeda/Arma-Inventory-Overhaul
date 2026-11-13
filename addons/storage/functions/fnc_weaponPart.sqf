@@ -10,7 +10,7 @@
  *
  * Arguments:
  * 0: Unit <OBJECT>
- * 1: Weapon slot - "primary", "handgun", "launcher" or "primary2" <STRING>
+ * 1: Weapon slot - "primary", "handgun", "launcher", "primary2" or "handgun2" <STRING>
  * 2: Put on (true) or take off (false) <BOOL>
  * 3: Class <STRING>
  * 4: Rounds, for a magazine put on <NUMBER> (default: -1)
@@ -33,8 +33,8 @@ private _weapon = (([_unit] call FUNC(getEquipment)) getOrDefault [_base, []]) p
 
 if (_weapon isEqualTo "") exitWith {};
 
-if (_base isEqualTo "primary2") exitWith {
-    private _back = +(([_unit] call FUNC(secondPrimary)) select 1);
+if (_base in ["primary2", "handgun2"]) exitWith {
+    private _back = +(([_unit, _base] call FUNC(secondPrimary)) select 1);
 
     if (_back isEqualTo []) exitWith {};
 
@@ -65,7 +65,7 @@ if (_base isEqualTo "primary2") exitWith {
         };
     };
 
-    [_unit, _back] call FUNC(setSecondPrimary);
+    [_unit, _back, _base] call FUNC(setSecondPrimary);
 };
 
 if (!_on) exitWith {

@@ -245,7 +245,7 @@ switch (_mode) do {
         };
 
         // Its own place: a sphere of its own per slot, apart from each other and from the inspect card's.
-        private _index = (["primary", "handgun", "launcher", "primary2"] find _slot) max 0;
+        private _index = (["primary", "handgun", "launcher", "primary2", "handgun2"] find _slot) max 0;
         private _place = [(INSPECT_3D_PLACE select 0) + 600 * (_index + 1), (INSPECT_3D_PLACE select 1) - 900];
         private _sceneBase = _place + [((getTerrainHeightASL _place) max 0) + 300];
         private _objects = [];

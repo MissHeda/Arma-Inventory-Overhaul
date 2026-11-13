@@ -11,6 +11,7 @@
  *
  * Arguments:
  * 0: Unit <OBJECT>
+ * 1: Slot - "primary2", or "handgun2" for the second handgun <STRING> (default: "primary2")
  *
  * Return Value:
  * [has the slot <BOOL>, weapon <ARRAY>] - the weapon as weaponsItems gives it, [class, muzzle, rail, optic,
@@ -22,9 +23,10 @@
  * Public: Yes
  */
 
-params [["_unit", objNull, [objNull]]];
+params [["_unit", objNull, [objNull]], ["_slot", "primary2", [""]]];
 
-private _get = GVAR(secondPrimaryMod) getOrDefault ["get", {}];
+// The second handgun (KJW's Two Secondary Weapons) is asked of its own compat addon, GVAR(secondHandgunMod).
+private _get = ([GVAR(secondPrimaryMod), GVAR(secondHandgunMod)] select (_slot isEqualTo "handgun2")) getOrDefault ["get", {}];
 
 if (isNull _unit || {_get isEqualTo {}}) exitWith {[false, []]};
 

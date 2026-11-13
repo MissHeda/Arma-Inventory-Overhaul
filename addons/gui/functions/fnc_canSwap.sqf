@@ -38,7 +38,7 @@ if (isNull _fromUnit || {isNull _toUnit}) exitWith {"NoFit"};
 
 // The primary and the second primary of one unit.
 if (_fromUnit isEqualTo _toUnit) exitWith {
-    if !([_fromSlot, _toSlot] in [["primary", "primary2"], ["primary2", "primary"]]) exitWith {"NoFit"};
+    if !([_fromSlot, _toSlot] in [["primary", "primary2"], ["primary2", "primary"], ["handgun", "handgun2"], ["handgun2", "handgun"]]) exitWith {"NoFit"};
     if (_fromUnit isNotEqualTo GVAR(unit)) exitWith {"NoFit"};
 
     private _entry = [_fromUnit, _fromSlot] call EFUNC(storage,getSlot);

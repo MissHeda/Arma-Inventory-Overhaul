@@ -58,14 +58,14 @@ private _controls = [];
     private _fits = if (_slotSource isEqualTo []) then {
         _owner isEqualTo _unit && {
             [_unit, _slot, _class, _equipment] call EFUNC(storage,slotAccepts) || {
-                _slot in ["primary", "handgun", "launcher", "primary2"] && {([_unit, _slot, _class, _equipment] call EFUNC(storage,partFor)) isNotEqualTo ""}
+                _slot in ["primary", "handgun", "launcher", "primary2", "handgun2"] && {([_unit, _slot, _class, _equipment] call EFUNC(storage,partFor)) isNotEqualTo ""}
             }
         }
     } else {
         !isNull _owner
         && {
             (_owner isNotEqualTo (_slotSource select 0) && {_slot isEqualTo (_slotSource select 1)})
-            || {_owner isEqualTo (_slotSource select 0) && {[_slotSource select 1, _slot] in [["primary", "primary2"], ["primary2", "primary"]]}}
+            || {_owner isEqualTo (_slotSource select 0) && {[_slotSource select 1, _slot] in [["primary", "primary2"], ["primary2", "primary"], ["handgun", "handgun2"], ["handgun2", "handgun"]]}}
         }
         && {[] call FUNC(isInventoryMode)} && {([_slotSource, _owner, _slot] call FUNC(canSwap)) isEqualTo ""}
     };

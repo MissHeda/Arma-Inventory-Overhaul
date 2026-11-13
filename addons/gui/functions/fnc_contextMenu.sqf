@@ -299,7 +299,7 @@ switch (GVAR(hover) param [0, ""]) do {
                             ];
                         };
                     } forEach _parts;
-                } forEach ["primary", "handgun", "launcher", "primary2"];
+                } forEach ["primary", "handgun", "launcher", "primary2", "handgun2"];
             } else {
                 private _slot = [_unit, _class] call EFUNC(storage,slotFor);
 
@@ -411,7 +411,7 @@ switch (GVAR(hover) param [0, ""]) do {
         private _worn = [_owner, _slot] call EFUNC(storage,getSlot);
 
         // One of the player's own weapons: Attachments opens it with its parts to change (#56, fnc_drawHotspots); Inspect only looks.
-        private _ownWeapon = _owner isEqualTo _unit && {_slot in ["primary", "handgun", "launcher", "primary2"]};
+        private _ownWeapon = _owner isEqualTo _unit && {_slot in ["primary", "handgun", "launcher", "primary2", "handgun2"]};
 
         _choices pushBack [
             LLSTRING(Menu_Inspect),
@@ -462,12 +462,18 @@ switch (GVAR(hover) param [0, ""]) do {
 
         // The primary and the second primary on the back (a two-primary mod, aio_storage_fnc_secondPrimary) trade
         // places - what that mod's own key does, without the hands having to be free of anything else.
-        if (_slot in ["primary", "primary2"]) then {
-            private _other = ["primary2", "primary"] select (_slot isEqualTo "primary2");
+        // The handgun and the second handgun of KJW's Two Secondary Weapons the same way.
+        if (_slot in ["primary", "primary2", "handgun", "handgun2"]) then {
+            private _other = createHashMapFromArray [
+                ["primary", "primary2"], ["primary2", "primary"], ["handgun", "handgun2"], ["handgun2", "handgun"]
+            ] get _slot;
 
             if (([[_owner, _slot], _owner, _other] call FUNC(canSwap)) isEqualTo "") then {
                 _choices pushBack [
-                    [LLSTRING(Menu_SwapSecondPrimary), LLSTRING(Menu_SwapPrimary)] select (_slot isEqualTo "primary2"),
+                    createHashMapFromArray [
+                        ["primary", LLSTRING(Menu_SwapSecondPrimary)], ["primary2", LLSTRING(Menu_SwapPrimary)],
+                        ["handgun", LLSTRING(Menu_SwapSecondHandgun)], ["handgun2", LLSTRING(Menu_SwapHandgun)]
+                    ] get _slot,
                     [[_owner, _slot], _owner, _other],
                     {_this call FUNC(doSwap)},
                     [UI_TEX(icon_swap_ca), [], "swap"] call _fnc_icon
@@ -484,7 +490,7 @@ switch (GVAR(hover) param [0, ""]) do {
         };
 
         // A weapon of someone else's: each of its parts on its own. The player's own have them all in Attachments.
-        if (_slot in ["primary", "handgun", "launcher", "primary2"] && {!_ownWeapon}) then {
+        if (_slot in ["primary", "handgun", "launcher", "primary2", "handgun2"] && {!_ownWeapon}) then {
             private _weapon = ([_owner] call EFUNC(storage,getEquipment)) getOrDefault [_slot, []];
 
             {

@@ -207,6 +207,16 @@ GVAR(weapon3DDefault) = call {
     {[] call FUNC(elementsChanged)}
 ] call CBA_fnc_addSetting;
 
+[
+    QGVAR(weapon3DZoom_handgun2),
+    "SLIDER",
+    [LLSTRING(Setting_Weapon3DZoom_Handgun2), LLSTRING(Setting_Weapon3DZoom_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    [50, 200, 100, 0],
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
 // Each player's own eyes: the crosshair on the caption line of the container quick moves go into (fnc_quickTarget, fnc_drawSection).
 // Picking one works the same with it off. Read at every build.
 [
@@ -294,9 +304,29 @@ GVAR(weapon3DDefault) = call {
 ] call CBA_fnc_addSetting;
 
 [
+    QGVAR(weapon3DOffsetX_handgun2),
+    "SLIDER",
+    [LLSTRING(Setting_Weapon3DOffsetX_Handgun2), LLSTRING(Setting_Weapon3DOffsetX_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    [-50, 50, 0, 0],
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
+[
     QGVAR(weapon3DOffsetY_primary2),
     "SLIDER",
     [LLSTRING(Setting_Weapon3DOffsetY_Primary2), LLSTRING(Setting_Weapon3DOffsetY_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    [-50, 50, 0, 0],
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
+[
+    QGVAR(weapon3DOffsetY_handgun2),
+    "SLIDER",
+    [LLSTRING(Setting_Weapon3DOffsetY_Handgun2), LLSTRING(Setting_Weapon3DOffsetY_Desc)],
     [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
     [-50, 50, 0, 0],
     0,
