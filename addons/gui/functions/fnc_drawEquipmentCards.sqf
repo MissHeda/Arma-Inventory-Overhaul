@@ -490,7 +490,13 @@ private _fnc_weaponCard = {
             private _hasRounds = _value isEqualType [] && {_capacity > 1};
             private _rounds = if (_hasRounds) then {_value param [1, 0, [0]]} else {0};
             private _text = if (_hasRounds) then {format ["%1/%2", _rounds, _capacity]} else {""};
-            private _textW = if (_hasRounds) then {(_text getTextWidth [_font, _ammoSize]) * TEXT_SLACK + SQUARE(_textUnit * 0.1)} else {0};
+
+            // The rounds sit close to the magazine's picture and as far from the plate's right edge as the picture is from its left
+            // (Mia, 0.7.27: they stood too far from the picture and too far right). _numberW is the words' own width, _textW what
+            // the plate grows by for them.
+            private _plateInset = _partW * PLATE_INSET;
+            private _numberW = if (_hasRounds) then {(_text getTextWidth [_font, _ammoSize]) * 1.04} else {0};
+            private _textW = if (_hasRounds) then {_numberW + _plateInset * 0.6} else {0};
 
             _partsRight = _partsRight - _partW - _textW;
 
@@ -519,9 +525,12 @@ private _fnc_weaponCard = {
             ] call FUNC(uiItemPicture);
 
             if (_hasRounds) then {
+                // Centred on where the number belongs, in a box wider than it: a label's own margins do not shift it then.
+                private _numberX = _partsRight + _partW - _plateInset * 0.4;
+
                 [
-                    _display, _parent, [_partsRight + _partW, _partsTop, _textW, _partH], _text, _ammoSize,
-                    [_colorText2, _theme getOrDefault ["loss", [0.9, 0.3, 0.25, 1]]] select (_rounds <= 0), _font, 0, "ammo"
+                    _display, _parent, [_numberX - _numberW * 0.5, _partsTop, _numberW * 2, _partH], _text, _ammoSize,
+                    [_colorText2, _theme getOrDefault ["loss", [0.9, 0.3, 0.25, 1]]] select (_rounds <= 0), _font, 2, "ammo"
                 ] call FUNC(uiLabel);
             };
 

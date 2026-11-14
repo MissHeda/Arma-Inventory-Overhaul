@@ -2,6 +2,15 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.7.28 - beta
+
+### Changed
+
+- Attachments view: in the list that opens on a part, the tile that is on is framed in the toned-down accent colour
+  of the line round the inspect card instead of the full accent colour; the other tiles' grey is fainter with it.
+- Weapon cards: a loaded magazine's rounds sit closer to its picture on the plate, and as far from the plate's right
+  edge as the picture is from its left.
+
 ## 0.7.27 - beta
 
 ### Changed

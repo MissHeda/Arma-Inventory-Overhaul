@@ -188,12 +188,16 @@ private _rowRadius = (_radius * 0.6) min (_rowH / 2);
 
         private _surfaceTile = [_display, _layer, [_tileX, _tileY, _tileW, _tileH], [0, 0, 0, 0], _tileRadius] call FUNC(uiPanel);
 
-        // The tile that is on framed in the accent colour, every other one thinly in grey - as the boxes on the 3D picture
-        // are, the empty ones grey (fnc_drawHotspots; Mia, 0.7.26).
+        // The tile that is on framed in the accent colour - toned down as the line round the inspect card is (fnc_drawInspect),
+        // not at its full strength (Mia, 0.7.27) -, every other one thinly in grey, fainter still so the one that is on stays
+        // the plainer of the two.
         if (_options getOrDefault ["outline", false]) then {
-            [_display, _layer, [_tileX, _tileY, _tileW, _tileH], _theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]], _tileRadius] call FUNC(uiRing);
+            [
+                _display, _layer, [_tileX, _tileY, _tileW, _tileH], ((_theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]]) select [0, 3]) + [MENU_RING_ON],
+                _tileRadius
+            ] call FUNC(uiRing);
         } else {
-            [_display, _layer, [_tileX, _tileY, _tileW, _tileH], [1, 1, 1, 0.3], _tileRadius] call FUNC(uiRing);
+            [_display, _layer, [_tileX, _tileY, _tileW, _tileH], [1, 1, 1, MENU_RING_OFF], _tileRadius] call FUNC(uiRing);
         };
         private _icon = _options getOrDefault ["icon", ""];
         private _faceH = _tileH * 0.6;
