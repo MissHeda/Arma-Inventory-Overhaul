@@ -37,6 +37,14 @@ missionNamespace setVariable ["gmr_main_preferContainer", _targetGrid getOrDefau
 
 // Onto a belt item: GreenMag's "Refill belt" with what was dragged.
 if (!isClass (configFile >> "CfgMagazines" >> _class)) exitWith {
+    // A belt on a belt: joined at once, the window stays open.
+    if (
+        !isNil "gmr_handling_fnc_canDropOnBelt"
+        && {(([_unit, _class, _item] call gmr_handling_fnc_canDropOnBelt) select 0) isEqualTo "combine"}
+    ) exitWith {
+        [_unit, _class, _item, _targetGrid getOrDefault ["container", objNull]] call gmr_handling_fnc_dropOnBelt
+    };
+
     ([_unit, _class, _item] call gmr_handling_fnc_beltRefillSource) params ["_round", "_from"];
 
     if ((([_item] call gmr_main_fnc_itemInfo) select GMR_ITEM_KIND) isEqualTo "pack") then {

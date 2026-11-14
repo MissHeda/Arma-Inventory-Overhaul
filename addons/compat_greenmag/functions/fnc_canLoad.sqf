@@ -55,9 +55,16 @@ if (
     if (_entry getOrDefault ["hidden", false] || {_targetTile getOrDefault ["hidden", false]} || {_targetTile getOrDefault ["pending", false]}) exitWith {[false, ""]};
 
     private _unit = missionNamespace getVariable [QEGVAR(gui,unit), objNull];
-    ([_unit, _class, _item] call gmr_handling_fnc_beltRefillSource) params ["_round", "", "_why"];
+    // GreenMag 1.3.0: a belt of the same type joins it, rounds that fit go onto it.
+    if (isNil "gmr_handling_fnc_canDropOnBelt") exitWith {
+        ([_unit, _class, _item] call gmr_handling_fnc_beltRefillSource) params ["_round", "", "_why"];
 
-    [_round isNotEqualTo "", _why]
+        [_round isNotEqualTo "", _why]
+    };
+
+    ([_unit, _class, _item] call gmr_handling_fnc_canDropOnBelt) params ["_mode", "", "", "_why"];
+
+    [_mode isNotEqualTo "", _why]
 };
 
 if (_class isEqualTo "" || {!isClass (configFile >> "CfgMagazines" >> _class)}) exitWith {[false, ""]};
