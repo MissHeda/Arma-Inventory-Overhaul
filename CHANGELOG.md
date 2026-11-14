@@ -2,6 +2,13 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.7.21 - beta
+
+### Changed
+
+- The red server warning and the hint name the versions as the window's footer does ("Server: v0.7.2 | You: v0.7.21"),
+  without a sentence's full stop behind the number.
+
 ## 0.7.20 - beta
 
 ### Changed

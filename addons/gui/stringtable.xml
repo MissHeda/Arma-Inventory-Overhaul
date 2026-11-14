@@ -296,7 +296,7 @@
             <English>The server does not answer - it may not run Arma Inventory Overhaul</English>
         </Key>
         <Key ID="STR_aio_gui_Hint_ServerVersion">
-            <English>The server runs Arma Inventory Overhaul %1, you run %2 - both need the same version</English>
+            <English>The server runs Arma Inventory Overhaul v%1, you run v%2 - both need the same version</English>
         </Key>
         <Key ID="STR_aio_gui_Hint_SingleSlot">
             <English>holds one item, whatever its size</English>
@@ -986,7 +986,7 @@
             <English>The mod on the server is out of date. It has to be updated there.</English>
         </Key>
         <Key ID="STR_aio_gui_ServerPopup_Mismatch">
-            <English>The server runs version %1. You run version %2.</English>
+            <English>Server: v%1  |  You: v%2</English>
         </Key>
         <Key ID="STR_aio_gui_ServerPopup_Mod">
             <English>Arma Inventory Overhaul</English>
