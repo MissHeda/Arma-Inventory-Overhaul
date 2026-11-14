@@ -2,6 +2,19 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.7.23 - beta
+
+### Fixed
+
+- The update check of 0.7.22 never asked: its address was cut off in the script, with an error in the log.
+- The red warning could close the moment it came up, by a key pressed just then (Space or Enter on its button, Esc).
+  For its first 1.5 seconds nothing closes it.
+
+### Changed
+
+- Update check: where the address took 3 seconds or more to answer once, it is switched off for that profile - a
+  host that never answers holds the game for 21 seconds (measured).
+
 ## 0.7.22 - beta
 
 ### Added

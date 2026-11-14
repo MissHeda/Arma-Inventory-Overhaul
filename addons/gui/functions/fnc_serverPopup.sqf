@@ -33,6 +33,9 @@
 #define POPUP_BODY [0.09, 0.03, 0.04, 0.97]
 #define POPUP_DIM [0.16, 0, 0, 0.6]
 
+// How long after it came up nothing closes it, in seconds.
+#define POPUP_GUARD 1.5
+
 params [["_reason", "mismatch", [""]], ["_server", "", [""]], ["_own", QUOTE(VERSION_STR), [""]], ["_again", false, [false]]];
 
 if (!hasInterface || {!(_reason in ["mismatch", "silent", "outdated"])}) exitWith {};
@@ -178,7 +181,19 @@ GVAR(serverPopupsShown) pushBackUnique _reason;
         (_line * 1.05) / (getNumber (configFile >> "RscButtonMenu" >> "size") max 0.001)
     ];
     _button ctrlCommit 0;
-    _button ctrlAddEventHandler ["ButtonClick", {(ctrlParent (_this select 0)) closeDisplay 1}];
+
+    // It comes up in the middle of play, under whatever keys are being pressed: for its first moments no key and no press
+    // of its button closes it - Space or Enter on the button, Esc -, or it would be gone before it was seen (0.7.22: a key
+    // typed as it opened closed it at once).
+    _display setVariable [QGVAR(popupFrom), diag_tickTime + POPUP_GUARD];
+    _display displayAddEventHandler ["KeyDown", {diag_tickTime < ((_this select 0) getVariable [QGVAR(popupFrom), 0])}];
+    _button ctrlAddEventHandler ["ButtonClick", {
+        private _display = ctrlParent (_this select 0);
+
+        if (diag_tickTime >= (_display getVariable [QGVAR(popupFrom), 0])) then {
+            _display closeDisplay 1;
+        };
+    }];
 
     ctrlSetFocus _button;
 }, [_reason, _server, _own]] call CBA_fnc_waitUntilAndExecute;
