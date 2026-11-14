@@ -102,6 +102,8 @@ PREP(raiseMenu);
 PREP(contextMenu);
 PREP(containerName);
 PREP(flashHint);
+PREP(notReadyText);
+PREP(serverPopup);
 PREP(doEquip);
 PREP(doUnequip);
 PREP(canSwap);

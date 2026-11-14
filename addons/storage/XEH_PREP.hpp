@@ -91,6 +91,7 @@ PREP(hubDisconnect);
 PREP(hubTick);
 PREP(greetServer);
 PREP(hubReady);
+PREP(hubState);
 
 // Nearby and the ground
 PREP(isNear);

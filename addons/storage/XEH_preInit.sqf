@@ -170,6 +170,10 @@ GVAR(hubTickAt) = 0;
 // client already took out.
 GVAR(serverVersion) = "";
 
+// When this machine first greeted the server (diag_tickTime, fnc_greetServer), -1 before: a server silent for a minute
+// most likely does not run this mod, and the window says so (fnc_hubState).
+GVAR(greetedAt) = -1;
+
 // Whether any of the "Use items from ..." settings limits something; set by them (fnc_useRefresh) and read
 // by everything that asks where an item may be used from, which has nothing to do while it is false. And
 // whether any of them is on Strict: then what they block is kept out of the cargo, in a hidden holder on the

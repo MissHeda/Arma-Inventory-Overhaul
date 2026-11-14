@@ -292,6 +292,12 @@
         <Key ID="STR_aio_gui_Hint_Selected">
             <English>%1 selected - drag them together, double click to move them over, the drop key drops them</English>
         </Key>
+        <Key ID="STR_aio_gui_Hint_ServerSilent">
+            <English>The server does not answer - it may not run Arma Inventory Overhaul</English>
+        </Key>
+        <Key ID="STR_aio_gui_Hint_ServerVersion">
+            <English>The server runs Arma Inventory Overhaul %1, you run %2 - both need the same version</English>
+        </Key>
         <Key ID="STR_aio_gui_Hint_SingleSlot">
             <English>holds one item, whatever its size</English>
         </Key>
@@ -969,6 +975,24 @@
         </Key>
         <Key ID="STR_aio_gui_Select">
             <English>Select</English>
+        </Key>
+        <Key ID="STR_aio_gui_ServerPopup_Close">
+            <English>OK</English>
+        </Key>
+        <Key ID="STR_aio_gui_ServerPopup_Effect">
+            <English>Until then, anything that goes through the server does not work here: dropping items, looting crates, bodies and vehicles, giving items to others.</English>
+        </Key>
+        <Key ID="STR_aio_gui_ServerPopup_Mismatch">
+            <English>The server runs version %1, you run version %2. Both need the same version of Arma Inventory Overhaul - update the mod on the server, or let Steam update yours.</English>
+        </Key>
+        <Key ID="STR_aio_gui_ServerPopup_Silent">
+            <English>The server has not answered for a minute. It most likely does not run Arma Inventory Overhaul - the mod has to be loaded on the server as well.</English>
+        </Key>
+        <Key ID="STR_aio_gui_ServerPopup_TitleMismatch">
+            <English>Arma Inventory Overhaul - version mismatch</English>
+        </Key>
+        <Key ID="STR_aio_gui_ServerPopup_TitleSilent">
+            <English>Arma Inventory Overhaul - no server answer</English>
         </Key>
         <Key ID="STR_aio_gui_Setting_CellScale">
             <English>Tile scale</English>

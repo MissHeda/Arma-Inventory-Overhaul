@@ -31,11 +31,18 @@ private _fnc_greet = {
     // Answered - with this version or another one: fnc_hubReady compares.
     if (GVAR(serverVersion) isNotEqualTo "") exitWith {};
 
+    if (GVAR(greetedAt) < 0) then {
+        GVAR(greetedAt) = diag_tickTime;
+    };
+
     [QGVAR(hello), [call FUNC(machineId), QUOTE(VERSION_STR)]] call CBA_fnc_serverEvent;
 
     // A minute of 5 s tries: the server most likely runs no Arma Inventory Overhaul at all.
     if (_tries == 12) then {
         WARNING("The server has not answered for a minute - moves through the server stay off until it does.");
+
+        // Said large on the screen (aio_gui_fnc_serverPopup).
+        [QGVAR(hubRefused), ["silent", "", QUOTE(VERSION_STR)]] call CBA_fnc_localEvent;
     };
 
     [_fnc_greet, [_fnc_greet, _tries + 1], [5, 30] select (_tries >= 12)] call CBA_fnc_waitAndExecute;

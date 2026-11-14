@@ -94,7 +94,7 @@ if !(_status in ["", "Requested"]) then {
         case "Gone": {LELSTRING(gui,Hint_Gone)};
         case "Taken": {LELSTRING(gui,Hint_Taken)};
         case "Moved": {LELSTRING(gui,Hint_Moved)};
-        case "NotReady": {LELSTRING(gui,Hint_NotReady)};
+        case "NotReady": {call EFUNC(gui,notReadyText)};
         default {LELSTRING(gui,Hint_Failed)};
     };
 

@@ -259,6 +259,9 @@ if (!isServer) then {
 
         if (_version isNotEqualTo QUOTE(VERSION_STR)) then {
             WARNING_2("The server runs Arma Inventory Overhaul %1, this machine %2 - nothing is moved through the server.",_version,QUOTE(VERSION_STR));
+
+            // Said large on the screen (aio_gui_fnc_serverPopup).
+            [QGVAR(hubRefused), ["mismatch", _version, QUOTE(VERSION_STR)]] call CBA_fnc_localEvent;
         };
     }] call CBA_fnc_addEventHandler;
 

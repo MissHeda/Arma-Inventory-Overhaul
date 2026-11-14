@@ -2,6 +2,20 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.7.18 - beta
+
+### Changed
+
+- "Waiting for the server" now says what is wrong when a move cannot go through the server: the server runs another
+  version of the mod (both versions are named), or it has not answered for a minute and most likely does not run the
+  mod at all. Only the first seconds after joining still say "Waiting for the server - try again in a moment".
+
+### Added
+
+- A large red warning over the game, as ACE shows for a version mismatch, when the server runs another version of the
+  mod than you, or has not answered for a minute. It names both versions and what does not work until then, and
+  shows once per mission.
+
 ## 0.7.17 - beta
 
 ### Added

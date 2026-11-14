@@ -18,6 +18,10 @@
 
 if (!hasInterface) exitWith {};
 
+// The server runs another version of this mod, or does not answer at all (aio_storage_hubRefused, from the storage's
+// greeting): said in a large red warning over the game, once per reason (fnc_serverPopup).
+[QEGVAR(storage,hubRefused), {_this call FUNC(serverPopup)}] call CBA_fnc_addEventHandler;
+
 // The settings the player set in the window (fnc_settingsRow), put back where they came up otherwise - not where the server or the
 // mission set them (fnc_settingForced). Each one put back says so in the RPT.
 {
