@@ -12,7 +12,7 @@
  * format), else with what its config fits on it; gear the holder shows the right way up - uniforms, vests, headgear - lies
  * on it too. What the holder will not take or shows upside down - backpacks, glasses, magazines, small items - stands as the
  * model alone, turned as KPBLM measured it. The camera aims at the weapon's base on the holder, gear a little higher. The
- * frame is the item's size, at most INSPECT_3D_FRAME. The lights shine by day too; the aperture is left to the engine - set,
+ * frame is the item's size, at most INSPECT_3D_FRAME. The lights are what shows it in the dark; the aperture is left to the engine - set,
  * it lit or darkened the whole world behind the window as well.
  *
  * The state is GVAR(scene3D): the class and attachments it shows, the camera and where it stands, the render target it films
@@ -388,18 +388,20 @@ switch (_mode) do {
         _scene set ["frame", _frame];
 
         // The lights, placed with the camera.
-        private _lights = [[30, [1, 0.97, 0.92], [1, 0.97, 0.92]], [12, [0.6, 0.7, 0.9], [0.7, 0.8, 1]], [20, [1, 1, 1], [1, 0.9, 0.8]]] apply {
-            _x params ["_brightness", "_ambient", "_colour"];
+        // Without falloff (INSPECT_3D_LIGHT_REACH): with a constant falloff of 1 they lit nothing at all - by day the sun alone
+        // showed the item, at night and at dusk the picture was black (measured in game, 0.7.25). Their strength is set for the
+        // dark; by day, with the camera's exposure down, they add next to nothing.
+        private _lights = [[1, [1, 0.97, 0.92], [1, 0.97, 0.92]], [0.4, [0.6, 0.7, 0.9], [0.7, 0.8, 1]], [0.67, [1, 1, 1], [1, 0.9, 0.8]]] apply {
+            _x params ["_share", "_ambient", "_colour"];
 
             private _light = "#lightpoint" createVehicleLocal [0, 0, 0];
             _light setPosASL _target;
-            _light setLightBrightness _brightness;
-            _light setLightIntensity (_brightness * 10);
+            _light setLightIntensity (INSPECT_3D_LIGHT * _share);
             _light setLightAmbient _ambient;
             _light setLightColor _colour;
             _light setLightUseFlare false;
             _light setLightDayLight true;
-            _light setLightAttenuation [0, 1, 0, 0, 20, 40];
+            _light setLightAttenuation INSPECT_3D_LIGHT_REACH;
             _objects pushBack _light;
 
             _light

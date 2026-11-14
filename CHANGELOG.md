@@ -2,6 +2,21 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.7.26 - beta
+
+### Fixed
+
+- Real weapon pictures and the 3D view were black at night and at dusk: the scenes' lights lit nothing, by day the sun
+  alone showed the weapon. The lights work now, so a weapon shows the same in the dark (measured in game).
+
+### Changed
+
+- Inspect in 3D: the line that says how to move the view stands on the foot of the picture itself, so its background
+  is the picture's whatever the light, and the 3D box has round corners again.
+- Attachments view: the boxes of the row under the picture are framed in grey, as the boxes on the picture are.
+- Weapon cards: the attachments' plates are framed in grey instead of the accent colour.
+- Inspect card: the row "Attached" is called "Attachments".
+
 ## 0.7.25 - beta
 
 ### Changed

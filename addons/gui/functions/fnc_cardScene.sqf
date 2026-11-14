@@ -299,19 +299,19 @@ switch (_mode) do {
         _scene set ["frameSize", _frame];
         _scene set ["distance", ((_frame * INSPECT_3D_DISTANCE * CARD_3D_DISTANCE) max 0.25) min 6];
 
-        // Softer than the inspect card's: at its strength a black weapon came out white on the small card (seen in game, 0.6.88).
-        _scene set ["lights", [[CARD_3D_LIGHT * 30, [1, 0.97, 0.92], [1, 0.97, 0.92]], [CARD_3D_LIGHT * 12, [0.6, 0.7, 0.9], [0.7, 0.8, 1]], [CARD_3D_LIGHT * 20, [1, 1, 1], [1, 0.9, 0.8]]] apply {
-            _x params ["_brightness", "_ambient", "_colour"];
+        // As the inspect card's (fnc_inspect3D): without falloff, or they light nothing and the card is black at night; their
+        // strength against that card's is CARD_3D_LIGHT.
+        _scene set ["lights", [[1, [1, 0.97, 0.92], [1, 0.97, 0.92]], [0.4, [0.6, 0.7, 0.9], [0.7, 0.8, 1]], [0.67, [1, 1, 1], [1, 0.9, 0.8]]] apply {
+            _x params ["_share", "_ambient", "_colour"];
 
             private _light = "#lightpoint" createVehicleLocal [0, 0, 0];
             _light setPosASL _holderPos;
-            _light setLightBrightness _brightness;
-            _light setLightIntensity (_brightness * 10);
+            _light setLightIntensity (INSPECT_3D_LIGHT * CARD_3D_LIGHT * _share);
             _light setLightAmbient _ambient;
             _light setLightColor _colour;
             _light setLightUseFlare false;
             _light setLightDayLight true;
-            _light setLightAttenuation [0, 1, 0, 0, 20, 40];
+            _light setLightAttenuation INSPECT_3D_LIGHT_REACH;
             _objects pushBack _light;
 
             _light

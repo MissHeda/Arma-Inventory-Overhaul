@@ -509,10 +509,10 @@ private _fnc_weaponCard = {
 
             [_display, _parent, [_partsRight, _partsTop, _partW + _textW, _partH], _plateColor, _partH * 0.25] call FUNC(uiPanel);
 
-            // Framed thinly in the accent colour, as the parts' boxes of the Attachments view are (fnc_drawHotspots) - faint here: the
-            // plates are small and many (Mia, 0.7.12).
+            // Framed thinly in grey, as the empty boxes of the Attachments view are (fnc_drawHotspots; Mia, 0.7.25 - in the accent
+            // colour before).
             [
-                _display, _parent, [_partsRight, _partsTop, _partW + _textW, _partH], (_colorAccent select [0, 3]) + [PLATE_RING_ALPHA], _partH * 0.25
+                _display, _parent, [_partsRight, _partsTop, _partW + _textW, _partH], [1, 1, 1, PLATE_RING_ALPHA], _partH * 0.25
             ] call FUNC(uiRing);
             [
                 _display, _parent, _partRect, _partInfo getOrDefault ["picture", ""], _partInfo getOrDefault ["icon", ICON_PLAIN], [1, 1, 1, 1], _partRect

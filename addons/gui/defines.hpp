@@ -594,9 +594,11 @@
 // into a target of its own name, INSPECT_3D_TARGET and the size, so a target made at one size never shows in a box of another.
 #define INSPECT_3D_TARGET "aio_inspect3d"
 
-// The colour the 3D view's dark sphere comes out as in the picture (fnc_inspect3D: its texture 0.05, 0.055, 0.065 under the
-// scene's lights; measured in the picture, 0.7.25) - the strip under the view is this colour, so it ends the picture.
-#define INSPECT_3D_BACKDROP [0.129, 0.137, 0.161, 1]
+// The 3D scenes' key light: its strength (setLightIntensity; the fill and the rim are shares of it), and its reach - no falloff
+// up to 30 m, gone at 60 m, well inside a scene's own sphere and far from the next scene (fnc_inspect3D, fnc_cardScene). Set in
+// the dark, where the lights alone show the item: 30 came out a little dim, 100 washed out (measured in game, 0.7.25).
+#define INSPECT_3D_LIGHT 50
+#define INSPECT_3D_LIGHT_REACH [0, 0, 0, 0, 30, 60]
 
 // The weapon cards' real pictures (fnc_cardScene, fnc_drawEquipmentCards): the target's name before the slot and size, the largest
 // texture (a card is small - kept low, one camera films per weapon all the time), and how much farther than the inspect card's 3D
@@ -614,10 +616,11 @@
 #define WEAPON_VIEW_ZOOM_MIN 0.4
 #define WEAPON_VIEW_ZOOM_MAX 5
 #define WEAPON_VIEW_MOVE 1.5
-// How strong the thin frame round an attachment's plate on a weapon card is (fnc_drawEquipmentCards), 0 to 1; how high a plate is
+// How strong the thin grey frame round an attachment's plate on a weapon card is (fnc_drawEquipmentCards), 0 to 1 - as the empty
+// boxes of the Attachments view are framed (fnc_drawHotspots); how high a plate is
 // in lines of the card's name, and how far its picture stays in from the frame, as a share of the plate (Mia, 0.7.13: "the
 // pictures are too near the frame").
-#define PLATE_RING_ALPHA 0.4
+#define PLATE_RING_ALPHA 0.3
 #define PLATE_LINES 1.45
 #define PLATE_INSET 0.14
 // How much of a bipod's height counts into a weapon's box: folded up it lies under the barrel (fnc_weaponBounds), in metres.
@@ -629,7 +632,7 @@
 // How many frames a weapon is filmed before its picture is kept as a still and the scene goes.
 #define CARD_3D_STILL_FRAMES 6
 // The scene's lights against the inspect card's.
-#define CARD_3D_LIGHT 0.15
+#define CARD_3D_LIGHT 1
 // The grey of the sphere round a weapon (0 to 1).
 #define CARD_3D_BACKDROP 0.025
 // How much darker the sphere behind a real weapon picture is painted than the card's colour: lit and exposed it comes out lighter.

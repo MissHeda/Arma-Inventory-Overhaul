@@ -350,7 +350,7 @@
             <English>Drag to turn, middle button to move, wheel to zoom, double click to reset</English>
         </Key>
         <Key ID="STR_aio_gui_Inspect_Attached">
-            <English>Attached</English>
+            <English>Attachments</English>
         </Key>
         <Key ID="STR_aio_gui_Inspect_Category">
             <English>Category</English>

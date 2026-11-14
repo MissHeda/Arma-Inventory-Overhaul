@@ -227,7 +227,8 @@ private _hint3D = LLSTRING(Inspect_3DTip);
 
 if (_show3D) then {
     _pictureH = (_viewPixelsH + 2) * pixelH;
-    _hint3DH = _textUnit * 1.05;
+    // In whole pixels: the picture goes on under the view by exactly this much.
+    _hint3DH = (round (_textUnit * 1.05 / pixelH)) * pixelH;
 };
 
 // A weapon looked at plainly in 3D: buttons on the picture's foot for its view - from the left, from the right, reset - and a
@@ -352,7 +353,12 @@ if (_show3D) then {
     // to 2:1, as high and wider on a wider one (21:9, three screens) - the box shows its middle (see INSPECT_3D_ASPECT). The
     // texture's sides are powers of two, or the engine does not load it; a target of its own name for its size.
     private _aspect = INSPECT_3D_ASPECT;
-    private _imagePixelsH = _viewPixelsH max (round (_viewPixelsW / _aspect));
+    //
+    // Under the 2:1 view the box shows as many more rows of the same picture as the line that says how to move it is high: the
+    // line stands on the picture's own background, whatever the light makes of it - a strip painted in a colour of its own
+    // was right by day and wrong at night (0.7.25). So the picture is at least that much higher than the view, above and below.
+    private _stripPixels = round (_hint3DH / pixelH);
+    private _imagePixelsH = (_viewPixelsH + _stripPixels * 2) max (round (_viewPixelsW / _aspect));
     private _imagePixelsW = _viewPixelsW max (round (_imagePixelsH * _aspect));
     private _textureW = (round (2 ^ ceil ((ln ((_imagePixelsW * INSPECT_3D_SUPER) max 64)) / (ln 2)))) min INSPECT_3D_MAX_RES;
     private _textureH = round (2 ^ round ((ln (_textureW / _aspect)) / (ln 2)));
@@ -369,7 +375,7 @@ if (_show3D) then {
     private _offsetX = floor ((_viewPixelsW - _imagePixelsW) / 2);
     private _offsetY = floor ((_viewPixelsH - _imagePixelsH) / 2);
 
-    private _clip = [_display, "AIO_Group", _group, _viewRect] call FUNC(uiCreate);
+    private _clip = [_display, "AIO_Group", _group, [_viewX, _viewY, _viewW, _viewH + _stripPixels * pixelH]] call FUNC(uiCreate);
     private _view = [
         _display, "AIO_PictureTurned", _clip, [_offsetX * pixelW, _offsetY * pixelH, _imagePixelsW * pixelW, _imagePixelsH * pixelH]
     ] call FUNC(uiCreate);
@@ -589,16 +595,13 @@ if (_viewRow && {_viewRect isNotEqualTo []}) then {
     }];
 };
 
-// How to move it, on the strip that ends the 3D box: in the colour of the view's own background (INSPECT_3D_BACKDROP), as
-// wide as the view and right under it, so view and strip read as one picture (Mia, 0.7.25). On one line, in letters as large
-// as its width lets them be.
+// How to move it, on the foot of the 3D picture itself (see the measures above) - on one line, in letters as large as its width
+// lets them be. And the box's corners round again, as the card's are: the outside of a quarter circle in the card's colour
+// over each corner of view and foot (Mia, 0.7.25 - the picture's own corners are square).
 if (_show3D && {_viewRect isNotEqualTo []}) then {
     _viewRect params ["_viewX", "_viewY", "_viewW", "_viewH"];
 
     private _stripY = _viewY + _viewH;
-
-    [_display, _group, [_viewX, _stripY, _viewW, _hint3DH - pixelH], INSPECT_3D_BACKDROP, 0] call FUNC(uiPanel);
-
     private _hintSize = _textUnit * 0.68;
     private _hintRoom = _viewW - SQUARE(_textUnit * 0.5);
     private _hintW = (_hint3D getTextWidth [_font, _hintSize]) * 1.05;
@@ -607,7 +610,27 @@ if (_show3D && {_viewRect isNotEqualTo []}) then {
         _hintSize = _hintSize * _hintRoom / _hintW;
     };
 
-    [_display, _group, [_viewX, _stripY - pixelH, _viewW, _hint3DH], _hint3D, _hintSize, _colorText2, _font, 2, "hint"] call FUNC(uiLabel);
+    [_display, _group, [_viewX, _stripY, _viewW, _hint3DH], _hint3D, _hintSize, _colorText2, _font, 2, "hint"] call FUNC(uiLabel);
+
+    private _maskRadius = (round (((_theme getOrDefault ["radius", 0]) min (_pictureH / 4)) / pixelH)) * pixelH;
+
+    if (_maskRadius >= pixelH * 2) then {
+        private _maskW = (round (SQUARE(_maskRadius) / pixelW)) * pixelW;
+        private _maskColor = (((_theme getOrDefault ["inspectBg", [0.06, 0.06, 0.06, 0.98]]) select [0, 3]) apply {_x max 0}) + [1];
+        private _boxBottom = _cursor + _pictureH + _hint3DH;
+
+        {
+            _x params ["_texture", "_maskX", "_maskY"];
+
+            private _mask = [_display, _group, [_maskX, _maskY, _maskW, _maskRadius], _texture, _maskColor] call FUNC(uiIcon);
+            _mask ctrlEnable false;
+        } forEach [
+            [UI_TEX(mask_tl_ca), _padX, _cursor],
+            [UI_TEX(mask_tr_ca), _padX + _innerW - _maskW, _cursor],
+            [UI_TEX(mask_bl_ca), _padX, _boxBottom - _maskRadius],
+            [UI_TEX(mask_br_ca), _padX + _innerW - _maskW, _boxBottom - _maskRadius]
+        ];
+    };
 };
 
 _cursor = _cursor + _pictureH + _hint3DH + _gap;
