@@ -60,7 +60,16 @@ GVAR(serverPopupsShown) pushBackUnique _reason;
 
     disableSerialization;
 
-    private _display = (findDisplay 46) createDisplay "RscDisplayEmpty";
+    // On top of whatever is open - the inventory, an arsenal: a display takes the mouse only as the last child, so the
+    // warning is made the child of the topmost one. Made on the mission's display under an open arsenal, its button
+    // could not be pressed.
+    private _parent = findDisplay 46;
+
+    while {!isNull displayChild _parent} do {
+        _parent = displayChild _parent;
+    };
+
+    private _display = _parent createDisplay "RscDisplayEmpty";
 
     if (isNull _display) exitWith {};
 
@@ -197,6 +206,24 @@ GVAR(serverPopupsShown) pushBackUnique _reason;
         if (diag_tickTime >= (_display getVariable [QGVAR(popupFrom), 0])) then {
             _display closeDisplay 1;
         };
+    }];
+
+    // And should the button's own click not come through - on ACE Arsenal's display the controls' events did not
+    // (aio_arsenal_fnc_onConfirmMouse) -, the display itself looks for the mouse on the button when the left button is let go.
+    _display setVariable [QGVAR(popupButton), _button];
+    _display displayAddEventHandler ["MouseButtonUp", {
+        params ["_display", "_mouseButton", "_mouseX", "_mouseY"];
+
+        (ctrlPosition (_display getVariable [QGVAR(popupButton), controlNull])) params [["_bx", 0], ["_by", 0], ["_bw", 0], ["_bh", 0]];
+
+        if (
+            _mouseButton == 0 && {diag_tickTime >= (_display getVariable [QGVAR(popupFrom), 0])}
+            && {_mouseX >= _bx} && {_mouseX <= _bx + _bw} && {_mouseY >= _by} && {_mouseY <= _by + _bh}
+        ) then {
+            _display closeDisplay 1;
+        };
+
+        false
     }];
 
     ctrlSetFocus _button;

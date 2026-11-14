@@ -2,6 +2,14 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.7.24 - beta
+
+### Fixed
+
+- The red warning opens on top of whatever is open - the inventory, ACE Arsenal - instead of beside it on the mission's
+  display, where its OK button could be out of the mouse's reach. A click on OK is also taken by the warning's window
+  itself, should the button's own click not come through.
+
 ## 0.7.23 - beta
 
 ### Fixed
