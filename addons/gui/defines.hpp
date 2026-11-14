@@ -594,6 +594,10 @@
 // into a target of its own name, INSPECT_3D_TARGET and the size, so a target made at one size never shows in a box of another.
 #define INSPECT_3D_TARGET "aio_inspect3d"
 
+// The colour the 3D view's dark sphere comes out as in the picture (fnc_inspect3D: its texture 0.05, 0.055, 0.065 under the
+// scene's lights; measured in the picture, 0.7.25) - the strip under the view is this colour, so it ends the picture.
+#define INSPECT_3D_BACKDROP [0.129, 0.137, 0.161, 1]
+
 // The weapon cards' real pictures (fnc_cardScene, fnc_drawEquipmentCards): the target's name before the slot and size, the largest
 // texture (a card is small - kept low, one camera films per weapon all the time), and how much farther than the inspect card's 3D
 // view the camera stands for the frame - side on, a long weapon fills the card's width.

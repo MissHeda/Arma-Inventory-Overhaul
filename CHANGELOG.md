@@ -6,8 +6,9 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 
 ### Changed
 
-- Inspect in 3D: the line that says how to turn, move and zoom the view is the foot of the 3D box now, under a
-  hairline, instead of standing loose between the box and the description - in larger letters, on two lines.
+- Inspect in 3D: the line that says how to turn, move and zoom the view is the foot of the 3D box now, on a
+  strip in the picture's own background colour, instead of standing loose between the box and the description -
+  on one line, in larger letters.
 
 ## 0.7.24 - beta
 

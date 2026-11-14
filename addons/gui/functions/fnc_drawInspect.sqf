@@ -227,7 +227,7 @@ private _hint3D = LLSTRING(Inspect_3DTip);
 
 if (_show3D) then {
     _pictureH = (_viewPixelsH + 2) * pixelH;
-    _hint3DH = _textUnit * 2.05;
+    _hint3DH = _textUnit * 1.05;
 };
 
 // A weapon looked at plainly in 3D: buttons on the picture's foot for its view - from the left, from the right, reset - and a
@@ -589,52 +589,25 @@ if (_viewRow && {_viewRect isNotEqualTo []}) then {
     }];
 };
 
-// How to move it, on the strip that ends the 3D box: a hairline parts it from the view.
-if (_show3D) then {
-    private _stripY = _cursor + _pictureH;
+// How to move it, on the strip that ends the 3D box: in the colour of the view's own background (INSPECT_3D_BACKDROP), as
+// wide as the view and right under it, so view and strip read as one picture (Mia, 0.7.25). On one line, in letters as large
+// as its width lets them be.
+if (_show3D && {_viewRect isNotEqualTo []}) then {
+    _viewRect params ["_viewX", "_viewY", "_viewW", "_viewH"];
 
-    [_display, _group, [_padX, _stripY, _innerW, pixelH], [1, 1, 1, 0.1], 0] call FUNC(uiPanel);
+    private _stripY = _viewY + _viewH;
 
-    // In letters large enough to read at a glance (Mia, 0.7.25), which one line of the strip's width does not hold: the words
-    // go on two lines, parted at the comma nearest their middle. Words without a comma, or wider still, are set smaller
-    // until they fit.
-    private _hintSize = _textUnit * 0.7;
-    private _hintRoom = _innerW - SQUARE(_textUnit * 0.6);
-    private _lines = [_hint3D];
+    [_display, _group, [_viewX, _stripY, _viewW, _hint3DH - pixelH], INSPECT_3D_BACKDROP, 0] call FUNC(uiPanel);
 
-    if ((_hint3D getTextWidth [_font, _hintSize]) * 1.05 > _hintRoom) then {
-        private _parts = _hint3D splitString ",";
-        private _best = 0;
-        private _bestGap = 1e9;
+    private _hintSize = _textUnit * 0.68;
+    private _hintRoom = _viewW - SQUARE(_textUnit * 0.5);
+    private _hintW = (_hint3D getTextWidth [_font, _hintSize]) * 1.05;
 
-        for "_i" from 1 to (count _parts - 1) do {
-            private _gapToMiddle = abs (count ((_parts select [0, _i]) joinString ",") - (count _hint3D) / 2);
-
-            if (_gapToMiddle < _bestGap) then {
-                _bestGap = _gapToMiddle;
-                _best = _i;
-            };
-        };
-
-        if (_best > 0) then {
-            _lines = [((_parts select [0, _best]) joinString ",") + ",", trim ((_parts select [_best, count _parts]) joinString ",")];
-        };
+    if (_hintW > _hintRoom) then {
+        _hintSize = _hintSize * _hintRoom / _hintW;
     };
 
-    private _widest = selectMax (_lines apply {(_x getTextWidth [_font, _hintSize]) * 1.05});
-
-    if (_widest > _hintRoom) then {
-        _hintSize = _hintSize * _hintRoom / _widest;
-    };
-
-    private _hintLineH = _textUnit * 0.85;
-    private _hintY = _stripY + (_hint3DH - _hintLineH * count _lines) / 2;
-
-    {
-        [
-            _display, _group, [_padX, _hintY + _forEachIndex * _hintLineH, _innerW, _hintLineH], _x, _hintSize, _colorText2, _font, 2, "hint"
-        ] call FUNC(uiLabel);
-    } forEach _lines;
+    [_display, _group, [_viewX, _stripY - pixelH, _viewW, _hint3DH], _hint3D, _hintSize, _colorText2, _font, 2, "hint"] call FUNC(uiLabel);
 };
 
 _cursor = _cursor + _pictureH + _hint3DH + _gap;
