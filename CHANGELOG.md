@@ -2,6 +2,14 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.7.32 - beta
+
+### Added
+
+- GreenMag Rework 1.3.0: loose rounds, a box of them or stripper clips let go on a belt go onto that belt ("Refill belt"),
+  its own rounds or universal ones; the footprint says why when they do not fit. What GreenMag makes - a split belt, the
+  rounds of an unloaded magazine, a refilled belt - lands in the container you did it in.
+
 ## 0.7.31 - beta
 
 ### Changed

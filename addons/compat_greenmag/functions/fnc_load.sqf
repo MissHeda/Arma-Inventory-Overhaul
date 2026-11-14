@@ -31,6 +31,30 @@ if !(([_sourceGrid, _entry, _targetGrid, _targetTile] call FUNC(canLoad)) select
 private _unit = missionNamespace getVariable [QEGVAR(gui,unit), objNull];
 private _item = _entry get "class";
 private _class = _targetTile get "class";
+
+// What GreenMag makes of it lands in the container of the tile let go on (GreenMag 1.3.0).
+missionNamespace setVariable ["gmr_main_preferContainer", _targetGrid getOrDefault ["container", objNull]];
+
+// Onto a belt item: GreenMag's "Refill belt" with what was dragged.
+if (!isClass (configFile >> "CfgMagazines" >> _class)) exitWith {
+    ([_unit, _class, _item] call gmr_handling_fnc_beltRefillSource) params ["_round", "_from"];
+
+    if ((([_item] call gmr_main_fnc_itemInfo) select GMR_ITEM_KIND) isEqualTo "pack") then {
+        [_unit, _item, true, _sourceGrid getOrDefault ["container", objNull]] call gmr_handling_fnc_unpack;
+    };
+
+    [{
+        ["GreenMag loading"] call EFUNC(gui,closeDisplay);
+
+        [{
+            params ["_unit", "_class", "_round", "_from"];
+
+            [_unit, "refillBelt", _class, [], _round, _from] call gmr_handling_fnc_start;
+        }, _this] call CBA_fnc_execNextFrame;
+    }, [_unit, _class, _round, _from]] call CBA_fnc_execNextFrame;
+
+    true
+};
 private _amount = _targetTile getOrDefault ["ammo", 0];
 private _facts = [_item] call gmr_main_fnc_itemInfo;
 private _isBelt = (_facts select GMR_ITEM_KIND) isEqualTo "belt";

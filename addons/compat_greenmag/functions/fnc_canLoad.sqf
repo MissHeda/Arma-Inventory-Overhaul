@@ -46,6 +46,20 @@ if !((_facts param [GMR_ITEM_KIND, ""]) in ["round", "clip", "pack", "belt"]) ex
 
 private _class = _targetTile getOrDefault ["class", ""];
 
+// Rounds or clips let go on one of GreenMag's belt items go onto that belt (GreenMag 1.3.0).
+if (
+    !isNil "gmr_handling_fnc_beltRefillSource"
+    && {(toLowerANSI _class) find "gmr_" == 0}
+    && {(([_class] call gmr_main_fnc_itemInfo) param [GMR_ITEM_KIND, ""]) isEqualTo "belt"}
+) exitWith {
+    if (_entry getOrDefault ["hidden", false] || {_targetTile getOrDefault ["hidden", false]} || {_targetTile getOrDefault ["pending", false]}) exitWith {[false, ""]};
+
+    private _unit = missionNamespace getVariable [QEGVAR(gui,unit), objNull];
+    ([_unit, _class, _item] call gmr_handling_fnc_beltRefillSource) params ["_round", "", "_why"];
+
+    [_round isNotEqualTo "", _why]
+};
+
 if (_class isEqualTo "" || {!isClass (configFile >> "CfgMagazines" >> _class)}) exitWith {[false, ""]};
 
 // A magazine GreenMag knows nothing of - a grenade, a launcher's round - is no place to load: the drag goes on.
