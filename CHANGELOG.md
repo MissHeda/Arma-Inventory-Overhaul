@@ -2,6 +2,14 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.7.30 - beta
+
+### Changed
+
+- The grey frames are one grey everywhere: round the attachments' plates on a weapon card, round an empty box on the
+  3D picture and round the tiles of the parts' list that are not on.
+- Weapon cards: a loaded magazine's rounds stand a little further right on the plate.
+
 ## 0.7.29 - beta
 
 ### Changed

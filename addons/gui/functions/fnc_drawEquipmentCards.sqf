@@ -526,7 +526,9 @@ private _fnc_weaponCard = {
 
             if (_hasRounds) then {
                 // Centred on where the number belongs, in a box wider than it: a label's own margins do not shift it then.
-                private _numberX = _partsRight + _partW - _plateInset * 0.4;
+                // A little right of where the picture's own frame ends: the magazine's picture is narrow in its square, and nearer
+                // to it the number looked pushed to the left of the plate (Mia, 0.7.29).
+                private _numberX = _partsRight + _partW - _plateInset * 0.05;
 
                 [
                     _display, _parent, [_numberX - _numberW * 0.5, _partsTop, _numberW * 2, _partH], _text, _ammoSize,
