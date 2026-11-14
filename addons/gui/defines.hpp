@@ -621,8 +621,8 @@
 // in lines of the card's name, and how far its picture stays in from the frame, as a share of the plate (Mia, 0.7.13: "the
 // pictures are too near the frame").
 #define PLATE_RING_ALPHA 0.3
-// How strong the frame round a tile of a tiles menu is (fnc_openMenu): the one that is on in the accent colour, as strong as the
-// line round the inspect card; the others in grey.
+// How strong the frame round a tile of a tiles menu is (fnc_openMenu), and round a part's box on the 3D picture
+// (fnc_drawHotspots): the one that is on in the accent colour, as strong as the line round the inspect card; the others in grey.
 #define MENU_RING_ON 0.3
 #define MENU_RING_OFF 0.16
 #define PLATE_LINES 1.45

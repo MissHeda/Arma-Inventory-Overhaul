@@ -323,8 +323,10 @@ if (_title isNotEqualTo "") then {
 
 if (_note isNotEqualTo "") then {
     [
-        _display, _layer, [_cardX + _padX, _cardY + _height - _padY - _noteH, _width - _padX * 2, _noteH], _note, _noteSize,
-        _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]], _font, 0, "hint"
+        // In the middle of the card's whole width: from the left, under tiles narrower than it, its first letter was cut off
+        // (Mia, 0.7.28).
+        _display, _layer, [_cardX, _cardY + _height - _padY - _noteH, _width, _noteH], _note, _noteSize,
+        _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]], _font, 2, "hint"
     ] call FUNC(uiLabel);
 };
 

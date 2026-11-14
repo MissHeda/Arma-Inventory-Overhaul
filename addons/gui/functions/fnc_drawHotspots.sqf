@@ -243,9 +243,10 @@ private _marks = _parts apply {
     private _rel = [_viewRect select 0, _viewRect select 1, _boxW, _boxH];
     private _box = [_display, "AIO_Group", _group, _rel] call FUNC(uiCreate);
 
-    // Glass, framed thinly - in the accent colour while a part is on it.
+    // Glass, framed thinly - in the accent colour while a part is on it, toned down as the tile that is on in the list of parts
+    // is (fnc_openMenu, MENU_RING_ON; Mia, 0.7.28 - at nearly its full strength before), and in that list's grey while empty.
     [_display, _box, [0, 0, _boxW, _boxH], [[0, 0, 0, 0.55], [0.1, 0.1, 0.11, 0.85]] select (_on isNotEqualTo ""), _radius] call FUNC(uiPanel);
-    [_display, _box, [0, 0, _boxW, _boxH], [[1, 1, 1, 0.3], _accent + [0.9]] select (_on isNotEqualTo ""), _radius] call FUNC(uiRing);
+    [_display, _box, [0, 0, _boxW, _boxH], [[1, 1, 1, MENU_RING_OFF], _accent + [MENU_RING_ON]] select (_on isNotEqualTo ""), _radius] call FUNC(uiRing);
 
     private _faceH = _boxH * 0.62;
     private _faceW = SQUARE(_faceH);

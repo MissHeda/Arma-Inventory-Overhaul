@@ -2,6 +2,18 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.7.29 - beta
+
+### Changed
+
+- Attachments view: the boxes on the 3D picture are framed as the tiles of the parts' list are - a part that is on in
+  the toned-down accent colour instead of the full one, an empty box in the fainter grey.
+
+### Fixed
+
+- Attachments view: the note under the parts' list ("Nothing in your gear or the loot fits here") stands in the middle
+  of the list; from the left its first letter was cut off.
+
 ## 0.7.28 - beta
 
 ### Changed
