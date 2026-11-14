@@ -19,6 +19,7 @@
  * 1: The server's version <STRING> (default: "")
  * 2: This machine's version <STRING> (default: this build's)
  * 3: Again, although this reason was shown already - for a look at it <BOOL> (default: false)
+ * 4: "outdated": on someone else's server, which has to update as well <BOOL> (default: a client in multiplayer)
  *
  * Return Value:
  * None
@@ -36,7 +37,10 @@
 // How long after it came up nothing closes it, in seconds.
 #define POPUP_GUARD 1.5
 
-params [["_reason", "mismatch", [""]], ["_server", "", [""]], ["_own", QUOTE(VERSION_STR), [""]], ["_again", false, [false]]];
+params [
+    ["_reason", "mismatch", [""]], ["_server", "", [""]], ["_own", QUOTE(VERSION_STR), [""]], ["_again", false, [false]],
+    ["_onServer", isMultiplayer && {!isServer}, [false]]
+];
 
 if (!hasInterface || {!(_reason in ["mismatch", "silent", "outdated"])}) exitWith {};
 
@@ -52,7 +56,7 @@ if (!_again && {_reason in GVAR(serverPopupsShown)}) exitWith {};
 GVAR(serverPopupsShown) pushBackUnique _reason;
 
 [{!isNull findDisplay 46 && {time > 0}}, {
-    params ["_reason", "_server", "_own"];
+    params ["_reason", "_server", "_own", "_onServer"];
 
     disableSerialization;
 
@@ -136,7 +140,7 @@ GVAR(serverPopupsShown) pushBackUnique _reason;
             [LLSTRING(ServerPopup_FixServer), LLSTRING(ServerPopup_FixRepair)] select _serverNewer,
             LLSTRING(ServerPopup_SilentFix),
             // On someone else's server, that one has to update as well.
-            [LLSTRING(ServerPopup_FixUpdate), LLSTRING(ServerPopup_FixUpdateServer)] select (isMultiplayer && {!isServer})
+            [LLSTRING(ServerPopup_FixUpdate), LLSTRING(ServerPopup_FixUpdateServer)] select _onServer
         ] select _index,
         "PuristaMedium", _line, "#ffffff"
     ] call _fnc_words;
@@ -196,4 +200,4 @@ GVAR(serverPopupsShown) pushBackUnique _reason;
     }];
 
     ctrlSetFocus _button;
-}, [_reason, _server, _own]] call CBA_fnc_waitUntilAndExecute;
+}, [_reason, _server, _own, _onServer]] call CBA_fnc_waitUntilAndExecute;
