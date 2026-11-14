@@ -49,6 +49,17 @@
     {[] call FUNC(sizeChanged)}
 ] call CBA_fnc_addSetting;
 
+// Each player's own: whether the game asks once per start if a newer version is on the Workshop (fnc_updateCheck) - it asks a
+// file on GitHub, which stops the game for a moment. Read when the mission's display comes up.
+[
+    QGVAR(updateCheck),
+    "CHECKBOX",
+    [LLSTRING(Setting_UpdateCheck), LLSTRING(Setting_UpdateCheck_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    true,
+    0
+] call CBA_fnc_addSetting;
+
 // Each player's own eyes.
 [
     QGVAR(compareTooltip),

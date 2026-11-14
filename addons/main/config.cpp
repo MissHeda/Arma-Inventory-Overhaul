@@ -16,3 +16,10 @@ class CfgPatches {
 };
 
 #include "CfgEventHandlers.hpp"
+
+// The one address the update check may load (aio_gui_fnc_updateCheck): the engine loads no address a config does not allow.
+class CfgCommands {
+    allowedHTMLLoadURIs[] += {
+        "https://raw.githubusercontent.com/MissHeda/Arma-Inventory-Overhaul/main/updates/outdated/*"
+    };
+};

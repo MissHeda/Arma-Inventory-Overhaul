@@ -104,6 +104,7 @@ PREP(containerName);
 PREP(flashHint);
 PREP(notReadyText);
 PREP(serverPopup);
+PREP(updateCheck);
 PREP(doEquip);
 PREP(doUnequip);
 PREP(canSwap);

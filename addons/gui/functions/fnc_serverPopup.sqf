@@ -8,11 +8,14 @@
  * to do: with the server's version the newer one, repair the mod in the Arma 3 Launcher - Steam fetches the current one then -;
  * with this machine's the newer one, the server has to update.
  *
+ * The same warning says that a newer version is on the Workshop ("outdated", fnc_updateCheck), also where the server runs
+ * this machine's version: repair in the launcher, and on a server that one has to update too.
+ *
  * A display of its own over the mission's, closed with its button or Esc; shown once per reason and mission, when the
  * mission's display is there.
  *
  * Arguments:
- * 0: Reason - "mismatch" or "silent" <STRING>
+ * 0: Reason - "mismatch", "silent" or "outdated" <STRING>
  * 1: The server's version <STRING> (default: "")
  * 2: This machine's version <STRING> (default: this build's)
  * 3: Again, although this reason was shown already - for a look at it <BOOL> (default: false)
@@ -32,7 +35,10 @@
 
 params [["_reason", "mismatch", [""]], ["_server", "", [""]], ["_own", QUOTE(VERSION_STR), [""]], ["_again", false, [false]]];
 
-if (!hasInterface || {!(_reason in ["mismatch", "silent"])}) exitWith {};
+if (!hasInterface || {!(_reason in ["mismatch", "silent", "outdated"])}) exitWith {};
+
+// The server's other version says it already.
+if (_reason isEqualTo "outdated" && {!_again} && {"mismatch" in (missionNamespace getVariable [QGVAR(serverPopupsShown), []])}) exitWith {};
 
 if (isNil QGVAR(serverPopupsShown)) then {
     GVAR(serverPopupsShown) = [];
@@ -59,7 +65,7 @@ GVAR(serverPopupsShown) pushBackUnique _reason;
     private _edge = _line * 0.16;
     private _pad = _line * 1.6;
     private _innerW = _w - _pad * 2;
-    private _silent = _reason isEqualTo "silent";
+    private _index = ["mismatch", "silent", "outdated"] find _reason;
 
     private _fnc_box = {
         params ["_color"];
@@ -108,7 +114,7 @@ GVAR(serverPopupsShown) pushBackUnique _reason;
     } forEach _serverParts;
 
     // The title never wider than the bar: a long one - another language - is set smaller until it fits.
-    private _titleWords = toUpper ([LLSTRING(ServerPopup_TitleMismatch), LLSTRING(ServerPopup_TitleSilent)] select _silent);
+    private _titleWords = toUpper ([LLSTRING(ServerPopup_TitleMismatch), LLSTRING(ServerPopup_TitleSilent), LLSTRING(ServerPopup_TitleOutdated)] select _index);
     private _titleSize = _line * 1.9;
     private _titleW = _titleWords getTextWidth ["PuristaBold", _titleSize];
 
@@ -119,11 +125,16 @@ GVAR(serverPopupsShown) pushBackUnique _reason;
     private _mod = [toUpper LLSTRING(ServerPopup_Mod), "PuristaSemibold", _line * 0.8, "#ffd9d9"] call _fnc_words;
     private _title = [_titleWords, "PuristaBold", _titleSize, "#ffffff"] call _fnc_words;
     private _what = [
-        [format [LLSTRING(ServerPopup_Mismatch), _server, _own], LLSTRING(ServerPopup_Silent)] select _silent,
+        [format [LLSTRING(ServerPopup_Mismatch), _server, _own], LLSTRING(ServerPopup_Silent), format [LLSTRING(ServerPopup_Outdated), _own]] select _index,
         "PuristaSemibold", _line * 1.15, "#ffffff"
     ] call _fnc_words;
     private _fix = [
-        [[LLSTRING(ServerPopup_FixServer), LLSTRING(ServerPopup_FixRepair)] select _serverNewer, LLSTRING(ServerPopup_SilentFix)] select _silent,
+        [
+            [LLSTRING(ServerPopup_FixServer), LLSTRING(ServerPopup_FixRepair)] select _serverNewer,
+            LLSTRING(ServerPopup_SilentFix),
+            // On someone else's server, that one has to update as well.
+            [LLSTRING(ServerPopup_FixUpdate), LLSTRING(ServerPopup_FixUpdateServer)] select (isMultiplayer && {!isServer})
+        ] select _index,
         "PuristaMedium", _line, "#ffffff"
     ] call _fnc_words;
 

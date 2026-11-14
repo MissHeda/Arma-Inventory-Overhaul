@@ -22,6 +22,16 @@ if (!hasInterface) exitWith {};
 // greeting): said in a large red warning over the game, once per reason (fnc_serverPopup).
 [QEGVAR(storage,hubRefused), {_this call FUNC(serverPopup)}] call CBA_fnc_addEventHandler;
 
+// A newer version on the Workshop than this build (fnc_updateCheck): asked once per game as the mission's display comes
+// up - the game stands still for a moment while it asks, which the loading screen hides -, and said in the same red
+// warning once per game, also where the server runs this same version.
+[{!isNull findDisplay 46}, {
+    if ((call FUNC(updateCheck)) isEqualTo "outdated" && {!(uiNamespace getVariable [QGVAR(updateTold), false])}) then {
+        uiNamespace setVariable [QGVAR(updateTold), true];
+        ["outdated"] call FUNC(serverPopup);
+    };
+}] call CBA_fnc_waitUntilAndExecute;
+
 // The settings the player set in the window (fnc_settingsRow), put back where they came up otherwise - not where the server or the
 // mission set them (fnc_settingForced). Each one put back says so in the RPT.
 {

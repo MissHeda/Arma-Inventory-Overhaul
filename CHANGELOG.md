@@ -2,6 +2,15 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.7.22 - beta
+
+### Added
+
+- Update check: once per game start the mod asks whether a newer version is on Steam, and says so in the red warning
+  ("Update available") with how to get it - also when the server runs the same old version as you. A script cannot ask
+  Steam itself, so it asks a small file in the mod's GitHub repository; the game stops for a moment (0.2 to 0.5
+  seconds measured) while the mission starts. The player setting "Check for updates" switches it off.
+
 ## 0.7.21 - beta
 
 ### Changed

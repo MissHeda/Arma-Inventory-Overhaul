@@ -88,6 +88,7 @@ private _rows = [
     ],
     [QGVAR(moveToStop), LLSTRING(Setting_MoveToStop), LLSTRING(Setting_MoveToStop_Desc), "check", true],
     [QGVAR(quickTargetIcon), LLSTRING(Setting_QuickTargetIcon), LLSTRING(Setting_QuickTargetIcon_Desc), "check", true],
+    [QGVAR(updateCheck), LLSTRING(Setting_UpdateCheck), LLSTRING(Setting_UpdateCheck_Desc), "check", true],
     [QEGVAR(weight,notify), LELSTRING(weight,Setting_Notify), LELSTRING(weight,Setting_Notify_Desc), "check", true],
     [
         QEGVAR(hotbar,hudMode), LELSTRING(hotbar,Setting_HudMode), LELSTRING(hotbar,Setting_HudMode_Desc), "list", 1,

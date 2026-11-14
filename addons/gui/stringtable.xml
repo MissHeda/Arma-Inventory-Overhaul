@@ -985,11 +985,20 @@
         <Key ID="STR_aio_gui_ServerPopup_FixServer">
             <English>The mod on the server is out of date. It has to be updated there.</English>
         </Key>
+        <Key ID="STR_aio_gui_ServerPopup_FixUpdate">
+            <English>Repair the mod in the Arma 3 Launcher: MODS, right-click Arma Inventory Overhaul, Repair.</English>
+        </Key>
+        <Key ID="STR_aio_gui_ServerPopup_FixUpdateServer">
+            <English>Repair the mod in the Arma 3 Launcher: MODS, right-click Arma Inventory Overhaul, Repair. The server has to update too.</English>
+        </Key>
         <Key ID="STR_aio_gui_ServerPopup_Mismatch">
             <English>Server: v%1  |  You: v%2</English>
         </Key>
         <Key ID="STR_aio_gui_ServerPopup_Mod">
             <English>Arma Inventory Overhaul</English>
+        </Key>
+        <Key ID="STR_aio_gui_ServerPopup_Outdated">
+            <English>You: v%1  |  A newer version is on Steam</English>
         </Key>
         <Key ID="STR_aio_gui_ServerPopup_Silent">
             <English>The server has not answered for a minute.</English>
@@ -999,6 +1008,9 @@
         </Key>
         <Key ID="STR_aio_gui_ServerPopup_TitleMismatch">
             <English>Version mismatch</English>
+        </Key>
+        <Key ID="STR_aio_gui_ServerPopup_TitleOutdated">
+            <English>Update available</English>
         </Key>
         <Key ID="STR_aio_gui_ServerPopup_TitleSilent">
             <English>Server does not answer</English>
@@ -1301,6 +1313,12 @@ Options of other mods (CBA) by their id.</English>
         </Key>
         <Key ID="STR_aio_gui_Setting_TileNames_Desc">
             <English>Short item names on tiles.\nOff: picture only, the name shows on hover.</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_UpdateCheck">
+            <English>Check for updates</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_UpdateCheck_Desc">
+            <English>Once per game start, asks whether a newer version of the mod is on Steam and tells you if so.\nThe game stops for a moment while it asks.</English>
         </Key>
         <Key ID="STR_aio_gui_Setting_WaitDrop">
             <English>Dropping waits</English>
