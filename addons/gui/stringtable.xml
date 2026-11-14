@@ -979,14 +979,14 @@
         <Key ID="STR_aio_gui_ServerPopup_Close">
             <English>OK</English>
         </Key>
-        <Key ID="STR_aio_gui_ServerPopup_Effect">
-            <English>Until then these do not work here: dropping items, looting crates, bodies and vehicles, giving items to others.</English>
+        <Key ID="STR_aio_gui_ServerPopup_FixRepair">
+            <English>Your mod is out of date. Repair it in the Arma 3 Launcher: MODS, right-click Arma Inventory Overhaul, Repair.</English>
+        </Key>
+        <Key ID="STR_aio_gui_ServerPopup_FixServer">
+            <English>The mod on the server is out of date. It has to be updated there.</English>
         </Key>
         <Key ID="STR_aio_gui_ServerPopup_Mismatch">
             <English>The server runs version %1. You run version %2.</English>
-        </Key>
-        <Key ID="STR_aio_gui_ServerPopup_MismatchFix">
-            <English>Both need the same version. Update the mod on the server, or let Steam update yours.</English>
         </Key>
         <Key ID="STR_aio_gui_ServerPopup_Mod">
             <English>Arma Inventory Overhaul</English>

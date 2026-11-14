@@ -4,7 +4,9 @@
  * The large red warning over the game when this machine and the server do not run the same Arma Inventory Overhaul - as ACE
  * warns of a version mismatch: the server answered with another version ("mismatch", both named), or has not answered for a
  * minute and most likely does not run the mod ("silent"). Moves that go through the server stay off then (fnc_hubReady), which
- * a line in the window's hint alone did not get across (Steam report, 0.7.2: dropping "sometimes" does not work).
+ * a line in the window's hint alone did not get across (Steam report, 0.7.2: dropping "sometimes" does not work). It says what
+ * to do: with the server's version the newer one, repair the mod in the Arma 3 Launcher - Steam fetches the current one then -;
+ * with this machine's the newer one, the server has to update.
  *
  * A display of its own over the mission's, closed with its button or Esc; shown once per reason and mission, when the
  * mission's display is there.
@@ -25,7 +27,6 @@
  */
 
 #define POPUP_RED [0.78, 0.09, 0.11, 1]
-#define POPUP_RED_DARK [0.42, 0.04, 0.06, 1]
 #define POPUP_BODY [0.09, 0.03, 0.04, 0.97]
 #define POPUP_DIM [0.16, 0, 0, 0.6]
 
@@ -86,13 +87,25 @@ GVAR(serverPopupsShown) pushBackUnique _reason;
         [_ctrl, ctrlTextHeight _ctrl]
     };
 
-    // The backgrounds first, under the words: the game dimmed red, the red frame, the dark body, the red title bar and
-    // the line that parts what is wrong from what it means. Placed below, once the heights are known.
+    // The backgrounds first, under the words: the game dimmed red, the red frame, the dark body, the red title bar.
+    // Placed below, once the heights are known.
     private _dim = [POPUP_DIM] call _fnc_box;
     private _frame = [POPUP_RED] call _fnc_box;
     private _back = [POPUP_BODY] call _fnc_box;
     private _bar = [POPUP_RED] call _fnc_box;
-    private _rule = [POPUP_RED_DARK] call _fnc_box;
+
+    // Which of the two is behind: the server's version is the newer one - this machine's mod is out of date, which a
+    // repair in the launcher mends -, or this machine's is - the server has to update. Compared number by number.
+    private _fnc_parts = {(_this splitString ".") apply {parseNumber _x}};
+    private _serverParts = _server call _fnc_parts;
+    private _ownParts = _own call _fnc_parts;
+    private _serverNewer = false;
+
+    {
+        private _mine = _ownParts param [_forEachIndex, 0];
+
+        if (_x != _mine) exitWith {_serverNewer = _x > _mine};
+    } forEach _serverParts;
 
     // The title never wider than the bar: a long one - another language - is set smaller until it fits.
     private _titleWords = toUpper ([LLSTRING(ServerPopup_TitleMismatch), LLSTRING(ServerPopup_TitleSilent)] select _silent);
@@ -110,14 +123,13 @@ GVAR(serverPopupsShown) pushBackUnique _reason;
         "PuristaSemibold", _line * 1.15, "#ffffff"
     ] call _fnc_words;
     private _fix = [
-        [LLSTRING(ServerPopup_MismatchFix), LLSTRING(ServerPopup_SilentFix)] select _silent, "PuristaMedium", _line, "#ffffff"
+        [[LLSTRING(ServerPopup_FixServer), LLSTRING(ServerPopup_FixRepair)] select _serverNewer, LLSTRING(ServerPopup_SilentFix)] select _silent,
+        "PuristaMedium", _line, "#ffffff"
     ] call _fnc_words;
-    private _effect = [LLSTRING(ServerPopup_Effect), "PuristaMedium", _line * 0.88, "#ffc9c9"] call _fnc_words;
 
     private _barH = _line * 0.7 + (_mod select 1) + (_title select 1) + _line * 0.7;
     private _buttonH = _line * 1.5;
-    private _h = _barH + _line * 1.3 + (_what select 1) + _line * 0.5 + (_fix select 1) + _line * 1.1 + _edge + _line * 1.1
-        + (_effect select 1) + _line * 1.3 + _buttonH + _line * 1.1;
+    private _h = _barH + _line * 1.3 + (_what select 1) + _line * 0.6 + (_fix select 1) + _line * 1.5 + _buttonH + _line * 1.1;
     private _top = safeZoneY + (safeZoneH - _h) / 2;
 
     {
@@ -143,17 +155,8 @@ GVAR(serverPopupsShown) pushBackUnique _reason;
         _ctrl ctrlCommit 0;
         _cursor = _cursor + _blockH + _gap;
     } forEach [
-        [_mod, 0], [_title, _line * 0.7 + _line * 1.3], [_what, _line * 0.5], [_fix, _line * 1.1]
+        [_mod, 0], [_title, _line * 0.7 + _line * 1.3], [_what, _line * 0.6], [_fix, _line * 1.5]
     ];
-
-    _rule ctrlSetPosition [_left + _w * 0.3, _cursor, _w * 0.4, _edge];
-    _rule ctrlSetBackgroundColor POPUP_RED;
-    _rule ctrlCommit 0;
-    _cursor = _cursor + _edge + _line * 1.1;
-
-    (_effect select 0) ctrlSetPosition [_left + _pad, _cursor, _innerW, _effect select 1];
-    (_effect select 0) ctrlCommit 0;
-    _cursor = _cursor + (_effect select 1) + _line * 1.3;
 
     private _button = _display ctrlCreate ["RscButtonMenu", -1];
     private _buttonW = _w * 0.26;

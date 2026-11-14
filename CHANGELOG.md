@@ -2,6 +2,14 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.7.20 - beta
+
+### Changed
+
+- The red server warning no longer lists what does not work. For a version mismatch it says who is behind and what to
+  do: with the server's version the newer one, repair the mod in the Arma 3 Launcher (MODS, right-click the mod,
+  Repair); with yours the newer one, the server has to update.
+
 ## 0.7.19 - beta
 
 ### Changed
