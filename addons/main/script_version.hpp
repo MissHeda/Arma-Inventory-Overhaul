@@ -1,3 +1,3 @@
 #define MAJOR 0
 #define MINOR 7
-#define PATCH 26
+#define PATCH 27

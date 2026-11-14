@@ -2,6 +2,14 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.7.27 - beta
+
+### Changed
+
+- Attachments view: in the list that opens on a part, the tiles that are not on are framed thinly in grey, the one
+  that is on in the accent colour as before. The grey frame round the boxes of the row under the picture (0.7.26) is
+  gone again.
+
 ## 0.7.26 - beta
 
 ### Fixed

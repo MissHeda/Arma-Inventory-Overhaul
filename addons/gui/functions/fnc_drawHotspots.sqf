@@ -176,9 +176,6 @@ private _size = _textUnit * 0.5;
         _display, _box, [0, 0, _boxW, _rowH], _theme getOrDefault [["slotEmpty", "slot"] select (_on isNotEqualTo ""), [1, 1, 1, 0.05]], _rowH * 0.3
     ] call FUNC(uiPanel);
 
-    // Framed thinly in grey, as the boxes on the picture are (Mia, 0.7.25).
-    [_display, _box, [0, 0, _boxW, _rowH], [1, 1, 1, 0.3], _rowH * 0.3] call FUNC(uiRing);
-
     private _faceH = _rowH * 0.8;
     private _faceW = SQUARE(_faceH);
     private _faceX = [(_boxW - _faceW) / 2, SQUARE(_rowH * 0.1)] select _named;
