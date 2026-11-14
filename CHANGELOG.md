@@ -2,6 +2,14 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.7.19 - beta
+
+### Changed
+
+- The red server warning is easier to read: the mod's name small above a short title ("Version mismatch", "Server does
+  not answer") that always fits its bar, what is wrong in one bold line, what to do under it, and what does not work
+  until then set apart below.
+
 ## 0.7.18 - beta
 
 ### Changed

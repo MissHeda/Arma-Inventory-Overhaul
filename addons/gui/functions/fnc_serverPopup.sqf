@@ -50,67 +50,119 @@ GVAR(serverPopupsShown) pushBackUnique _reason;
 
     if (isNull _display) exitWith {};
 
-    // Two thirds of the screen wide, in the middle; heights in lines of the title's size.
-    private _line = safeZoneH * 0.045;
+    // Two thirds of the screen wide, in the middle, as high as its words need. Sizes in lines: _line is the body's
+    // text height.
+    private _line = safeZoneH * 0.034;
     private _w = safeZoneW * 0.62;
-    private _h = _line * 10.2;
     private _left = safeZoneX + (safeZoneW - _w) / 2;
-    private _top = safeZoneY + (safeZoneH - _h) / 2;
-    private _edge = _line * 0.12;
-    private _pad = _line * 0.8;
+    private _edge = _line * 0.16;
+    private _pad = _line * 1.6;
+    private _innerW = _w - _pad * 2;
+    private _silent = _reason isEqualTo "silent";
 
     private _fnc_box = {
-        params ["_rect", "_color"];
+        params ["_color"];
 
         private _ctrl = _display ctrlCreate ["RscText", -1];
 
-        _ctrl ctrlSetPosition _rect;
         _ctrl ctrlSetBackgroundColor _color;
-        _ctrl ctrlCommit 0;
         _ctrl
     };
 
-    // The game behind it dimmed red, a red frame, the dark body, the red title bar.
-    [[safeZoneX, safeZoneY, safeZoneW, safeZoneH], POPUP_DIM] call _fnc_box;
-    [[_left - _edge * 0.75, _top - _edge, _w + _edge * 1.5, _h + _edge * 2], POPUP_RED] call _fnc_box;
-    [[_left, _top, _w, _h], POPUP_BODY] call _fnc_box;
-    [[_left, _top, _w, _line * 2.2], POPUP_RED] call _fnc_box;
-    [[_left, _top + _line * 2.2, _w, _edge], POPUP_RED_DARK] call _fnc_box;
+    // A block of words: as wide as the box inside its padding, its height as its lines need. Returns [control, height].
+    private _base = getNumber (configFile >> "RscStructuredText" >> "size") max 0.001;
 
-    private _title = _display ctrlCreate ["RscStructuredText", -1];
+    private _fnc_words = {
+        params ["_words", "_font", "_size", "_color"];
 
-    _title ctrlSetPosition [_left, _top + _line * 0.42, _w, _line * 1.5];
-    _title ctrlSetStructuredText parseText format [
-        "<t align='center' font='PuristaBold' size='%2' color='#ffffff'>%1</t>",
-        toUpper ([LLSTRING(ServerPopup_TitleMismatch), LLSTRING(ServerPopup_TitleSilent)] select (_reason isEqualTo "silent")),
-        (_line * 1.25) / (getNumber (configFile >> "RscStructuredText" >> "size") max 0.001)
-    ];
-    _title ctrlCommit 0;
+        private _ctrl = _display ctrlCreate ["RscStructuredText", -1];
 
-    private _body = if (_reason isEqualTo "silent") then {
-        LLSTRING(ServerPopup_Silent)
-    } else {
-        format [LLSTRING(ServerPopup_Mismatch), _server, _own]
+        _ctrl ctrlSetPosition [_left + _pad, 0, _innerW, _line];
+        _ctrl ctrlCommit 0;
+        _ctrl ctrlSetStructuredText parseText format [
+            "<t align='center' shadow='0' font='%2' size='%3' color='%4'>%1</t>", _words, _font, _size / _base, _color
+        ];
+
+        [_ctrl, ctrlTextHeight _ctrl]
     };
 
-    private _text = _display ctrlCreate ["RscStructuredText", -1];
+    // The backgrounds first, under the words: the game dimmed red, the red frame, the dark body, the red title bar and
+    // the line that parts what is wrong from what it means. Placed below, once the heights are known.
+    private _dim = [POPUP_DIM] call _fnc_box;
+    private _frame = [POPUP_RED] call _fnc_box;
+    private _back = [POPUP_BODY] call _fnc_box;
+    private _bar = [POPUP_RED] call _fnc_box;
+    private _rule = [POPUP_RED_DARK] call _fnc_box;
 
-    _text ctrlSetPosition [_left + _pad, _top + _line * 3, _w - _pad * 2, _line * 4.9];
-    _text ctrlSetStructuredText parseText format [
-        "<t align='center' font='RobotoCondensed' size='%2' color='#ffffff'>%1<br/><br/><t color='#ffb3b3'>%3</t></t>",
-        _body, (_line * 0.82) / (getNumber (configFile >> "RscStructuredText" >> "size") max 0.001), LLSTRING(ServerPopup_Effect)
+    // The title never wider than the bar: a long one - another language - is set smaller until it fits.
+    private _titleWords = toUpper ([LLSTRING(ServerPopup_TitleMismatch), LLSTRING(ServerPopup_TitleSilent)] select _silent);
+    private _titleSize = _line * 1.9;
+    private _titleW = _titleWords getTextWidth ["PuristaBold", _titleSize];
+
+    if (_titleW > _innerW) then {
+        _titleSize = _titleSize * _innerW / _titleW;
+    };
+
+    private _mod = [toUpper LLSTRING(ServerPopup_Mod), "PuristaSemibold", _line * 0.8, "#ffd9d9"] call _fnc_words;
+    private _title = [_titleWords, "PuristaBold", _titleSize, "#ffffff"] call _fnc_words;
+    private _what = [
+        [format [LLSTRING(ServerPopup_Mismatch), _server, _own], LLSTRING(ServerPopup_Silent)] select _silent,
+        "PuristaSemibold", _line * 1.15, "#ffffff"
+    ] call _fnc_words;
+    private _fix = [
+        [LLSTRING(ServerPopup_MismatchFix), LLSTRING(ServerPopup_SilentFix)] select _silent, "PuristaMedium", _line, "#ffffff"
+    ] call _fnc_words;
+    private _effect = [LLSTRING(ServerPopup_Effect), "PuristaMedium", _line * 0.88, "#ffc9c9"] call _fnc_words;
+
+    private _barH = _line * 0.7 + (_mod select 1) + (_title select 1) + _line * 0.7;
+    private _buttonH = _line * 1.5;
+    private _h = _barH + _line * 1.3 + (_what select 1) + _line * 0.5 + (_fix select 1) + _line * 1.1 + _edge + _line * 1.1
+        + (_effect select 1) + _line * 1.3 + _buttonH + _line * 1.1;
+    private _top = safeZoneY + (safeZoneH - _h) / 2;
+
+    {
+        _x params ["_ctrl", "_rect"];
+
+        _ctrl ctrlSetPosition _rect;
+        _ctrl ctrlCommit 0;
+    } forEach [
+        [_dim, [safeZoneX, safeZoneY, safeZoneW, safeZoneH]],
+        [_frame, [_left - _edge * 0.75, _top - _edge, _w + _edge * 1.5, _h + _edge * 2]],
+        [_back, [_left, _top, _w, _h]],
+        [_bar, [_left, _top, _w, _barH]]
     ];
-    _text ctrlCommit 0;
+
+    // The words, top down.
+    private _cursor = _top + _line * 0.7;
+
+    {
+        _x params ["_block", "_gap"];
+        _block params ["_ctrl", "_blockH"];
+
+        _ctrl ctrlSetPosition [_left + _pad, _cursor, _innerW, _blockH];
+        _ctrl ctrlCommit 0;
+        _cursor = _cursor + _blockH + _gap;
+    } forEach [
+        [_mod, 0], [_title, _line * 0.7 + _line * 1.3], [_what, _line * 0.5], [_fix, _line * 1.1]
+    ];
+
+    _rule ctrlSetPosition [_left + _w * 0.3, _cursor, _w * 0.4, _edge];
+    _rule ctrlSetBackgroundColor POPUP_RED;
+    _rule ctrlCommit 0;
+    _cursor = _cursor + _edge + _line * 1.1;
+
+    (_effect select 0) ctrlSetPosition [_left + _pad, _cursor, _innerW, _effect select 1];
+    (_effect select 0) ctrlCommit 0;
+    _cursor = _cursor + (_effect select 1) + _line * 1.3;
 
     private _button = _display ctrlCreate ["RscButtonMenu", -1];
-    private _buttonW = _w * 0.24;
+    private _buttonW = _w * 0.26;
 
-    _button ctrlSetPosition [_left + (_w - _buttonW) / 2, _top + _h - _line * 1.75, _buttonW, _line * 1.15];
+    _button ctrlSetPosition [_left + (_w - _buttonW) / 2, _cursor, _buttonW, _buttonH];
     _button ctrlSetStructuredText parseText format [
         "<t align='center' font='PuristaBold' size='%2'>%1</t>", toUpper LLSTRING(ServerPopup_Close),
-        (_line * 0.8) / (getNumber (configFile >> "RscButtonMenu" >> "size") max 0.001)
+        (_line * 1.05) / (getNumber (configFile >> "RscButtonMenu" >> "size") max 0.001)
     ];
-    _button ctrlSetBackgroundColor POPUP_RED;
     _button ctrlCommit 0;
     _button ctrlAddEventHandler ["ButtonClick", {(ctrlParent (_this select 0)) closeDisplay 1}];
 

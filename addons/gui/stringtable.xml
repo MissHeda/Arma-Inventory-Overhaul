@@ -980,19 +980,28 @@
             <English>OK</English>
         </Key>
         <Key ID="STR_aio_gui_ServerPopup_Effect">
-            <English>Until then, anything that goes through the server does not work here: dropping items, looting crates, bodies and vehicles, giving items to others.</English>
+            <English>Until then these do not work here: dropping items, looting crates, bodies and vehicles, giving items to others.</English>
         </Key>
         <Key ID="STR_aio_gui_ServerPopup_Mismatch">
-            <English>The server runs version %1, you run version %2. Both need the same version of Arma Inventory Overhaul - update the mod on the server, or let Steam update yours.</English>
+            <English>The server runs version %1. You run version %2.</English>
+        </Key>
+        <Key ID="STR_aio_gui_ServerPopup_MismatchFix">
+            <English>Both need the same version. Update the mod on the server, or let Steam update yours.</English>
+        </Key>
+        <Key ID="STR_aio_gui_ServerPopup_Mod">
+            <English>Arma Inventory Overhaul</English>
         </Key>
         <Key ID="STR_aio_gui_ServerPopup_Silent">
-            <English>The server has not answered for a minute. It most likely does not run Arma Inventory Overhaul - the mod has to be loaded on the server as well.</English>
+            <English>The server has not answered for a minute.</English>
+        </Key>
+        <Key ID="STR_aio_gui_ServerPopup_SilentFix">
+            <English>It most likely does not run Arma Inventory Overhaul. The mod has to be loaded on the server too.</English>
         </Key>
         <Key ID="STR_aio_gui_ServerPopup_TitleMismatch">
-            <English>Arma Inventory Overhaul - version mismatch</English>
+            <English>Version mismatch</English>
         </Key>
         <Key ID="STR_aio_gui_ServerPopup_TitleSilent">
-            <English>Arma Inventory Overhaul - no server answer</English>
+            <English>Server does not answer</English>
         </Key>
         <Key ID="STR_aio_gui_Setting_CellScale">
             <English>Tile scale</English>
