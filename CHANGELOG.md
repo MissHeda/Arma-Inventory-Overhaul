@@ -2,6 +2,13 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.7.25 - beta
+
+### Changed
+
+- Inspect in 3D: the line that says how to turn, move and zoom the view is the foot of the 3D box now, under a
+  hairline, instead of standing loose between the box and the description.
+
 ## 0.7.24 - beta
 
 ### Fixed

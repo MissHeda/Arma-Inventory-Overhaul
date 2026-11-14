@@ -328,8 +328,9 @@ _closeTheme set ["radius", [0, _closeH * 0.25] select ((_theme getOrDefault ["ra
 
 _cursor = _cursor + _titleH + _gap;
 
-// The picture on a lighter box, with what is on a weapon drawn onto it.
-[_display, _group, [_padX, _cursor, _innerW, _pictureH], _theme getOrDefault ["slot", [1, 1, 1, 0.05]], (_theme getOrDefault ["radius", 0]) min (_pictureH / 4)] call FUNC(uiPanel);
+// The picture on a lighter box, with what is on a weapon drawn onto it. In 3D the box goes on under the view by a strip that says
+// how to move it - the view's own foot, not a line standing loose under the box (Mia, 0.7.24).
+[_display, _group, [_padX, _cursor, _innerW, _pictureH + _hint3DH], _theme getOrDefault ["slot", [1, 1, 1, 0.05]], (_theme getOrDefault ["radius", 0]) min (_pictureH / 4)] call FUNC(uiPanel);
 
 private _pictureInner = [_padX * 2, _cursor + _padY * 0.5, _innerW - _padX * 2, _pictureH - _padY];
 
@@ -588,7 +589,15 @@ if (_viewRow && {_viewRect isNotEqualTo []}) then {
     }];
 };
 
-_cursor = _cursor + _pictureH + _gap;
+// How to move it, on the strip that ends the 3D box: a hairline parts it from the view.
+if (_show3D) then {
+    private _stripY = _cursor + _pictureH;
+
+    [_display, _group, [_padX, _stripY, _innerW, pixelH], [1, 1, 1, 0.1], 0] call FUNC(uiPanel);
+    [_display, _group, [_padX, _stripY, _innerW, _hint3DH], _hint3D, _textUnit * 0.55, _colorText2, _font, 2, "hint"] call FUNC(uiLabel);
+};
+
+_cursor = _cursor + _pictureH + _hint3DH + _gap;
 
 // The weapon's parts: on the 3D picture and in a row under it (fnc_drawHotspots). No point on the switch.
 if (_partsH > 0) then {
@@ -599,13 +608,6 @@ if (_partsH > 0) then {
     ] call FUNC(drawHotspots);
 
     _cursor = _cursor + _partsH + _gap;
-};
-
-// How to move it, under the 3D view.
-if (_show3D) then {
-    [_display, _group, [_padX, _cursor - _gap * 0.5, _innerW, _hint3DH], _hint3D, _textUnit * 0.55, _muted, _font, 2, "hint"] call FUNC(uiLabel);
-
-    _cursor = _cursor + _hint3DH;
 };
 
 // How to change the parts.
