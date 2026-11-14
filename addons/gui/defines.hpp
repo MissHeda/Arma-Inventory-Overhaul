@@ -628,6 +628,8 @@
 #define MENU_RING_OFF PLATE_RING_ALPHA
 #define PLATE_LINES 1.45
 #define PLATE_INSET 0.14
+// How much of its square is empty on each side of a magazine's picture, as a share of the square (fnc_drawEquipmentCards).
+#define PLATE_MAG_MARGIN 0.28
 // How much of a bipod's height counts into a weapon's box: folded up it lies under the barrel (fnc_weaponBounds), in metres.
 #define BIPOD_FOLDED 0.05
 // How far an attachment reaches from its slot at most - beside it, below it, above it - in metres (fnc_weaponBounds).

@@ -648,7 +648,17 @@ if (_partsH > 0) then {
 
 // How to change the parts.
 if (_hintModifyH > 0) then {
-    [_display, _group, [_padX, _cursor - _gap * 0.5, _innerW, _hintModifyH], LLSTRING(Modify_Tip), _textUnit * 0.55, _muted, _font, 2, "hint"] call FUNC(uiLabel);
+    // In the middle of the card, and never wider than it: with larger text its end was cut off at the card's edge and the line
+    // stood off-centre (Mia, 0.7.30).
+    private _tip = LLSTRING(Modify_Tip);
+    private _tipSize = _textUnit * 0.55;
+    private _tipW = (_tip getTextWidth [_font, _tipSize]) * 1.06;
+
+    if (_tipW > _innerW) then {
+        _tipSize = _tipSize * _innerW / _tipW;
+    };
+
+    [_display, _group, [0, _cursor - _gap * 0.5, _width, _hintModifyH], _tip, _tipSize, _muted, _font, 2, "hint"] call FUNC(uiLabel);
 
     _cursor = _cursor + _hintModifyH;
 };

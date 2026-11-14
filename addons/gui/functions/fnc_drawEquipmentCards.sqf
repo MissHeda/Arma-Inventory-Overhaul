@@ -491,12 +491,14 @@ private _fnc_weaponCard = {
             private _rounds = if (_hasRounds) then {_value param [1, 0, [0]]} else {0};
             private _text = if (_hasRounds) then {format ["%1/%2", _rounds, _capacity]} else {""};
 
-            // The rounds sit close to the magazine's picture and as far from the plate's right edge as the picture is from its left
-            // (Mia, 0.7.27: they stood too far from the picture and too far right). _numberW is the words' own width, _textW what
-            // the plate grows by for them.
+            // Magazine and rounds stand in the middle of their plate as one: a magazine's picture is narrow in its square
+            // (PLATE_MAG_MARGIN of the square is empty on each side of it), so the rounds start that much inside the square, a
+            // frame's inset from the magazine, and the plate ends as far behind them as the magazine stands from its left edge
+            // (Mia, 0.7.30: the rounds were too near the edge). _numberW is the words' own width, _textW what the plate grows by.
             private _plateInset = _partW * PLATE_INSET;
+            private _magMargin = _partW * (1 - PLATE_INSET * 2) * PLATE_MAG_MARGIN;
             private _numberW = if (_hasRounds) then {(_text getTextWidth [_font, _ammoSize]) * 1.04} else {0};
-            private _textW = if (_hasRounds) then {_numberW + _plateInset * 0.6} else {0};
+            private _textW = if (_hasRounds) then {_numberW + _plateInset} else {0};
 
             _partsRight = _partsRight - _partW - _textW;
 
@@ -526,9 +528,7 @@ private _fnc_weaponCard = {
 
             if (_hasRounds) then {
                 // Centred on where the number belongs, in a box wider than it: a label's own margins do not shift it then.
-                // A little right of where the picture's own frame ends: the magazine's picture is narrow in its square, and nearer
-                // to it the number looked pushed to the left of the plate (Mia, 0.7.29).
-                private _numberX = _partsRight + _partW - _plateInset * 0.05;
+                private _numberX = _partsRight + _partW - _magMargin;
 
                 [
                     _display, _parent, [_numberX - _numberW * 0.5, _partsTop, _numberW * 2, _partH], _text, _ammoSize,

@@ -2,6 +2,17 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.7.31 - beta
+
+### Changed
+
+- Weapon cards: a loaded magazine and its rounds stand in the middle of their plate, with the same room on both sides.
+
+### Fixed
+
+- Attachments view: the line "Click a part to change it, ..." stands in the middle of the card and is set smaller where
+  it would not fit; with larger text its end was cut off.
+
 ## 0.7.30 - beta
 
 ### Changed
