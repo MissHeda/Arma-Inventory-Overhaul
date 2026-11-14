@@ -227,7 +227,7 @@ private _hint3D = LLSTRING(Inspect_3DTip);
 
 if (_show3D) then {
     _pictureH = (_viewPixelsH + 2) * pixelH;
-    _hint3DH = _textUnit * 0.75;
+    _hint3DH = _textUnit * 2.05;
 };
 
 // A weapon looked at plainly in 3D: buttons on the picture's foot for its view - from the left, from the right, reset - and a
@@ -594,7 +594,47 @@ if (_show3D) then {
     private _stripY = _cursor + _pictureH;
 
     [_display, _group, [_padX, _stripY, _innerW, pixelH], [1, 1, 1, 0.1], 0] call FUNC(uiPanel);
-    [_display, _group, [_padX, _stripY, _innerW, _hint3DH], _hint3D, _textUnit * 0.55, _colorText2, _font, 2, "hint"] call FUNC(uiLabel);
+
+    // In letters large enough to read at a glance (Mia, 0.7.25), which one line of the strip's width does not hold: the words
+    // go on two lines, parted at the comma nearest their middle. Words without a comma, or wider still, are set smaller
+    // until they fit.
+    private _hintSize = _textUnit * 0.7;
+    private _hintRoom = _innerW - SQUARE(_textUnit * 0.6);
+    private _lines = [_hint3D];
+
+    if ((_hint3D getTextWidth [_font, _hintSize]) * 1.05 > _hintRoom) then {
+        private _parts = _hint3D splitString ",";
+        private _best = 0;
+        private _bestGap = 1e9;
+
+        for "_i" from 1 to (count _parts - 1) do {
+            private _gapToMiddle = abs (count ((_parts select [0, _i]) joinString ",") - (count _hint3D) / 2);
+
+            if (_gapToMiddle < _bestGap) then {
+                _bestGap = _gapToMiddle;
+                _best = _i;
+            };
+        };
+
+        if (_best > 0) then {
+            _lines = [((_parts select [0, _best]) joinString ",") + ",", trim ((_parts select [_best, count _parts]) joinString ",")];
+        };
+    };
+
+    private _widest = selectMax (_lines apply {(_x getTextWidth [_font, _hintSize]) * 1.05});
+
+    if (_widest > _hintRoom) then {
+        _hintSize = _hintSize * _hintRoom / _widest;
+    };
+
+    private _hintLineH = _textUnit * 0.85;
+    private _hintY = _stripY + (_hint3DH - _hintLineH * count _lines) / 2;
+
+    {
+        [
+            _display, _group, [_padX, _hintY + _forEachIndex * _hintLineH, _innerW, _hintLineH], _x, _hintSize, _colorText2, _font, 2, "hint"
+        ] call FUNC(uiLabel);
+    } forEach _lines;
 };
 
 _cursor = _cursor + _pictureH + _hint3DH + _gap;
