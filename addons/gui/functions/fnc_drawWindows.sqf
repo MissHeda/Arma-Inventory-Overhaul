@@ -90,7 +90,9 @@ GVAR(windowFresh) = [];
 
 // A first click remembered on a window's tile is forgotten: whatever was drawn at that place in the list
 // of grids now may be another tile.
-if (((GVAR(lastClick) select 0) param [0, -1]) >= _columnGrids) then {
+// A click on a slot keeps the slot's owner (an object) first, not a grid index - forget it as well.
+private _clickGrid = (GVAR(lastClick) select 0) param [0, -1];
+if (!(_clickGrid isEqualType 0) || {_clickGrid >= _columnGrids}) then {
     GVAR(lastClick) = [[], -1];
 };
 

@@ -2,6 +2,13 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.7.33 - beta
+
+### Fixed
+
+- After a click on a weapon or attachment slot, every redraw of the window threw a script error and skipped the top layer:
+  weapons could no longer be dragged and popups no longer opened until a restart.
+
 ## 0.7.32 - beta
 
 ### Added
