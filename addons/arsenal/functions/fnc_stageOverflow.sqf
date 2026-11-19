@@ -46,9 +46,16 @@ private _any = _sections findIf {
 
 if (_any < 0) exitWith {0};
 
-private _staging = [] call FUNC(staging);
+// An AI whose surplus is kept (aio_storage_fnc_aiKeeps): only its other worn containers - what fits none stays in
+// its inventory, as a red tile; the staging space would take it away with the window.
+private _keeps = [_unit] call EFUNC(storage,aiKeeps);
+private _staging = objNull;
 
-if (isNull _staging) exitWith {0};
+if (!_keeps) then {
+    _staging = [] call FUNC(staging);
+};
+
+if (isNull _staging && {!_keeps}) exitWith {0};
 
 (call FUNC(selected)) params ["", "_open"];
 
@@ -104,7 +111,7 @@ private _stagedCount = 0;
             };
 
             break;
-        } forEach ((_sections apply {_x get "container"}) + [_staging]);
+        } forEach ((_sections apply {_x get "container"}) + ([[_staging], []] select _keeps));
 
         if (!_done) exitWith {};
     };

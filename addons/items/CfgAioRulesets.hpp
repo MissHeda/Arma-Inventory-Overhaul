@@ -35,7 +35,7 @@ class CfgAioRulesets {
     class Default {
         name = CSTRING(Ruleset_Default);
         description = CSTRING(Ruleset_Default_Desc);
-        revision = 5;
+        revision = 6;
         base = "";
         cell = -1;
         rules[] = {
@@ -61,7 +61,7 @@ class CfgAioRulesets {
             "@mag_rifle: kind=magazine mass>5 mass<=20 !@belt !@rocket",
             "@mag_large: kind=magazine mass>20 !@belt !@rocket !@rocket_heavy",
             "@grenade: kind=grenade",
-            "@belt > size=3x2",
+            "@belt > size=2x2",
             "@rocket > size=1x3",
             "@rocket_heavy > size=2x3",
             "@mag_small > size=1x1",
@@ -154,13 +154,13 @@ class CfgAioRulesets {
             "class=ACME_BloodCooler_CSWB4U|efak_MFAKPlus+ > size=3x3 stack=1",
 
             // GreenMag Rework (aio_compat_greenmag): loose rounds twenty to a tile, a speedloader 1x2, the boxes of rounds 2x2 and
-            // the belts 3x2 like the machine gun belts they load, stripper clips (GreenMag 1.1) five to a tile. Each with every class
+            // the belts 2x2 like the machine gun belts they load, stripper clips (GreenMag 1.1) five to a tile. Each with every class
             // built on it - the boxes of clips are boxes too.
             "class=gmr_round_base+ > size=1x1 stack=20",
             "class=gmr_clip_base+ > size=1x1 stack=5",
             "class=gmr_speedloader+ > size=1x2 stack=1",
             "class=gmr_pack_base+ > size=2x2 stack=1",
-            "class=gmr_belt_base+ > size=3x2 stack=1"
+            "class=gmr_belt_base+ > size=2x2 stack=1"
         };
 
         // Examples only where the class surely lands in that group; the others stay "" until they

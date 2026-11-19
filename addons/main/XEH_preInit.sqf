@@ -41,7 +41,7 @@ GVAR(topics) = [
         "aio_gui_searchContainers", "aio_gui_searchZeus", "aio_gui_searchGround", "aio_gui_searchOnClick", "aio_gui_soundsWorld"
     ]],
     ["persons", ELSTRING(setup,Topic_persons), ["aio_gui_personNotify", "aio_gui_personOpen", "aio_gui_personItems", "aio_gui_personWorn"]],
-    ["containers", ELSTRING(storage,SubCategory_Containers), ["aio_storage_migrate", "aio_storage_useUniform", "aio_storage_useVest", "aio_storage_useBackpack"]],
+    ["containers", ELSTRING(storage,SubCategory_Containers), ["aio_storage_migrate", "aio_storage_aiKeepSurplus", "aio_storage_useUniform", "aio_storage_useVest", "aio_storage_useBackpack", "aio_storage_aiIgnoresUse"]],
     ["weight", ELSTRING(weight,SubCategory_Weight), ["aio_weight_enabled", "aio_weight_heavyAt", "aio_weight_overloadedAt", "aio_weight_criticalAt", "aio_weight_effects"]],
     ["extras", ELSTRING(setup,Topic_extras), ["aio_hotbar_enabled", "aio_magazines_repack", "aio_locks_zeusOpens", "aio_gui_menuHidden"]],
     ["arsenal", ELSTRING(setup,Topic_arsenal), ["aio_compat_antistasi_arsenal_panel", "aio_arsenal_biArsenal", "aio_arsenal_biMessage"]],

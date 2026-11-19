@@ -26,8 +26,16 @@ if (is3DEN) exitWith {0};
 
 private _noted = 0;
 
+// AI that may not ignore the "Use items from ..." settings (GVAR(aiStrict), fnc_useRefresh): a living AI is noted
+// too when its containers hold what it may not use (fnc_hiddenDue) - a mission's loadout, a pick-up, a resupply
+// raise no event of ours. A few cargo reads per AI and sweep, only while that switch is off.
+private _aiStrict = missionNamespace getVariable [QGVAR(aiStrict), false];
+
 {
-    if (local _x && {!isNil {_x getVariable QGVAR(hidden)}}) then {
+    if (local _x && {
+        !isNil {_x getVariable QGVAR(hidden)}
+        || {_aiStrict && {alive _x} && {!isPlayer _x} && {_x isKindOf "CAManBase"} && {[_x] call FUNC(hiddenDue)}}
+    }) then {
         [_x] call FUNC(queueMigrate);
         _noted = _noted + 1;
     };

@@ -45,7 +45,7 @@ private _active = _strictActive && {[_unit] call FUNC(hiddenActive)};
     private _kind = USE_KINDS select _x;
     private _container = _own select _x;
     private _list = _lists select _x;
-    private _strict = _active && {!isNull _container} && {([_kind] call FUNC(useMode)) isEqualTo USE_STRICT};
+    private _strict = _active && {!isNull _container} && {[_unit, _kind] call FUNC(hiddenStrict)};
 
     if (_list isNotEqualTo [] && {
         !_strict

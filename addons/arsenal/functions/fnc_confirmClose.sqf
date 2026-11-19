@@ -42,6 +42,12 @@ private _found = [];
 
 if (GVAR(ready) && {!is3DEN} && {!isNull _center} && {local _center}) then {
     _found = [_center] call FUNC(findOverflow);
+
+    // An AI whose surplus is kept (aio_storage_fnc_aiKeeps) keeps what lies beyond its grid: only the staging
+    // space, which goes with the window, is asked about.
+    if ([_center] call EFUNC(storage,aiKeeps)) then {
+        _found = _found select {(_x select 0) isEqualTo GVAR(staging)};
+    };
 };
 
 if (_found isEqualTo []) exitWith {

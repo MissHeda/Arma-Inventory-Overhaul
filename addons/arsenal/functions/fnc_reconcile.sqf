@@ -36,7 +36,9 @@ private _undone = createHashMap;
 private _refused = "";
 private _census = call FUNC(poolCensus);
 
-if (!isNull _container && {_known isEqualTo _container} && {local _center}) then {
+// An AI whose surplus is kept (aio_storage_fnc_aiKeeps): ACE's add stands - what finds no cell moves on to another
+// of its containers or stays as surplus (fnc_stageOverflow).
+if (!isNull _container && {_known isEqualTo _container} && {local _center} && {!([_center] call EFUNC(storage,aiKeeps))}) then {
     private _now = [_container] call FUNC(countAll);
     private _gained = createHashMap;
 

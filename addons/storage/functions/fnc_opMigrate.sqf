@@ -54,6 +54,11 @@ if (isNull _unit || {!(_unit isKindOf "CAManBase")}) exitWith {["Moved", [], []]
 
 if (ARSENAL_OPEN || {!(missionNamespace getVariable [QGVAR(migrate), true])}) exitWith {["Skipped", [], []]};
 
+// An AI whose surplus is kept (fnc_aiKeeps): both ways, as the player's sweep - what fits nowhere stays where it is.
+if (!_wide && {[_unit] call FUNC(aiKeeps)}) then {
+    _wide = true;
+};
+
 // Uniform, vest, backpack - those the unit has. getSections also marks each with its unit, which the
 // compartments depend on (fnc_getOwner).
 private _containers = ([_unit] call FUNC(getSections)) apply {_x get "container"};

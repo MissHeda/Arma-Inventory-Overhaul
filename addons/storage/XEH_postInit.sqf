@@ -173,6 +173,14 @@ if (hasInterface) then {
         if (!isNull _unit && {local _unit}) then {
             [_unit] call FUNC(hiddenReturn);
         };
+
+        // An AI dressed there (Zeus, a mission's arsenal) whose holder keeps what it may not use
+        // (aio_storage_aiIgnoresUse off): the same, so the arsenal sees its real gear.
+        private _center = missionNamespace getVariable [QACEGVAR(arsenal,center), objNull];
+
+        if (!isNull _center && {_center isNotEqualTo _unit} && {local _center} && {!isNil {_center getVariable QGVAR(hidden)}}) then {
+            [_center] call FUNC(hiddenReturn);
+        };
     }] call CBA_fnc_addEventHandler;
 
     // A body's places must be public for its looters, also those written less than OWN_WRITE_DELAY

@@ -21,7 +21,10 @@
  */
 
 GVAR(useActive) = (USE_KINDS findIf {([_x] call FUNC(useMode)) isNotEqualTo USE_ALL}) >= 0;
-GVAR(strictActive) = (USE_KINDS findIf {([_x] call FUNC(useMode)) isEqualTo USE_STRICT}) >= 0;
+// AI that may not ignore the settings (aio_storage_aiIgnoresUse off) is held to them by the hidden holder as well,
+// on Only whitelisted and Nothing too (fnc_hiddenStrict).
+GVAR(aiStrict) = GVAR(useActive) && {!(missionNamespace getVariable [QGVAR(aiIgnoresUse), true])};
+GVAR(strictActive) = GVAR(aiStrict) || {(USE_KINDS findIf {([_x] call FUNC(useMode)) isEqualTo USE_STRICT}) >= 0};
 
 if (!is3DEN) then {
     call FUNC(hiddenSweep);

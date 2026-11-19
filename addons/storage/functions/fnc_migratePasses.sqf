@@ -4,8 +4,8 @@
  * Which container's surplus may go to which, for a unit's worn containers in the order uniform, vest,
  * backpack (those it has): each container to the ones after it - the order of preference -, and, when
  * asked for, then to the ones before it. The surplus pass of every unit goes on only (fnc_opMigrate,
- * fnc_requestMigrate); the player's overflow sweep goes both ways (fnc_requestSweep) before anything is
- * put on the ground, since a cell anywhere is better than none.
+ * fnc_requestMigrate) but that of an AI whose surplus is kept (fnc_aiKeeps); the player's overflow sweep goes
+ * both ways (fnc_requestSweep) before anything is put on the ground, since a cell anywhere is better than none.
  *
  * Arguments:
  * 0: How many containers the unit has <NUMBER>

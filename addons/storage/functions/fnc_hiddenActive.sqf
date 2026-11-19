@@ -25,4 +25,5 @@
 
 params [["_unit", objNull, [objNull]]];
 
-!isNull _unit && {alive _unit} && {isPlayer _unit} && {!is3DEN} && {!ARSENAL_OPEN}
+// An AI only while AI may not ignore the "Use items from ..." settings (aio_storage_aiIgnoresUse off).
+!isNull _unit && {alive _unit} && {isPlayer _unit || {!(missionNamespace getVariable [QGVAR(aiIgnoresUse), true])}} && {!is3DEN} && {!ARSENAL_OPEN}

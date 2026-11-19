@@ -31,7 +31,13 @@ private _code = uiNamespace getVariable [QGVAR(confirmCode), 1];
 if (isNull _display) exitWith {};
 
 private _center = (call FUNC(center));
-private _gone = [_center] call FUNC(dropOverflow);
+// An AI whose surplus is kept (aio_storage_fnc_aiKeeps) was asked about the staging space only, which goes with the
+// window: its own surplus stays.
+private _gone = createHashMap;
+
+if !([_center] call EFUNC(storage,aiKeeps)) then {
+    _gone = [_center] call FUNC(dropOverflow);
+};
 
 if (count _gone > 0) then {
     private _list = [];

@@ -60,18 +60,21 @@ if (!_held && {!ARSENAL_OPEN} && {missionNamespace getVariable [QGVAR(migrate), 
     private _containers = ([_unit] call FUNC(getSections)) apply {_x get "container"};
     private _movable = false;
 
-    for "_i" from 0 to (count _containers - 2) do {
-        private _from = _containers select _i;
+    // An AI whose surplus is kept looks both ways (fnc_aiKeeps); op "migrate" does the same for it.
+    {
+        _x params ["_fromIndex", "_toIndices"];
+
+        private _from = _containers select _fromIndex;
         private _over = ([_from, [_from] call FUNC(getContents)] call FUNC(getLayout)) get "overflow";
 
         if (_over isEqualTo []) then {continue};
 
-        private _targets = (_containers select [_i + 1]) apply {[_x, _unit]};
+        private _targets = _toIndices apply {[_containers select _x, _unit]};
 
         if ((([_over, _targets] call FUNC(plan)) select 0) isNotEqualTo []) exitWith {
             _movable = true;
         };
-    };
+    } forEach ([count _containers, [_unit] call FUNC(aiKeeps)] call FUNC(migratePasses));
 
     if (_movable) then {
         _ops pushBack ["migrate", [_unit]];

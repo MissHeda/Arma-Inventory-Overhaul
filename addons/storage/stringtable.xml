@@ -40,6 +40,18 @@
         <Key ID="STR_aio_storage_Option_UseStrict">
             <English>Strict (hidden)</English>
         </Key>
+        <Key ID="STR_aio_storage_Setting_AiIgnoresUse">
+            <English>AI ignores locked containers</English>
+        </Key>
+        <Key ID="STR_aio_storage_Setting_AiIgnoresUse_Desc">
+            <English>On: AI uses everything it carries, whatever the "Use items from" settings say.\nOff: AI cannot use what lies in a container those settings close to it.</English>
+        </Key>
+        <Key ID="STR_aio_storage_Setting_AiKeepSurplus">
+            <English>AI keeps what does not fit</English>
+        </Key>
+        <Key ID="STR_aio_storage_Setting_AiKeepSurplus_Desc">
+            <English>An AI's items that fit no cell go to another of its containers,\nelse stay in its inventory as surplus - never dropped or removed,\nalso not by ACE Arsenal.</English>
+        </Key>
         <Key ID="STR_aio_storage_Setting_ContainerTable">
             <English>Container sizes</English>
         </Key>

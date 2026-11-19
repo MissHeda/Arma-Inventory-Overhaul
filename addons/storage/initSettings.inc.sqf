@@ -36,6 +36,18 @@
     true
 ] call EFUNC(main,addSetting);
 
+// The same for everyone: an AI's loadout (a mission's, Zeus's, one set in ACE Arsenal) is never thinned out. What
+// lies on no cell first goes to any other of the unit's containers with room - both ways (op "migrate" with
+// "wide", fnc_requestMigrate) - and what fits none stays in its inventory as surplus: ACE Arsenal on an AI
+// neither stages nor removes it (aio_arsenal_fnc_onClosed). Off: an AI's surplus only moves on and the arsenal
+// removes it, as for a player.
+[
+    QGVAR(aiKeepSurplus),
+    "CHECKBOX",
+    [LLSTRING(Setting_AiKeepSurplus), LLSTRING(Setting_AiKeepSurplus_Desc)],
+    true
+] call EFUNC(main,addSetting);
+
 // The same for everyone, like the rules: every machine has to agree on a container's compartments, or
 // a layout worked out on one would not fit on another. The older way to size containers by class -
 // the items addon reads it as rules of its own, after the rules text (aio_items_fnc_compileRules),
@@ -88,3 +100,15 @@
 ] call EFUNC(main,addSetting);
 
 #undef USE_OPTIONS
+
+// The same for everyone: whether an AI may use what lies in a container a "Use items from ..." setting closes
+// (the padlocks). On, as always: an AI uses everything it carries. Off: what an AI may not use from a container is
+// kept out of its cargo in the unit's hidden holder, as Strict does for a player (fnc_hiddenStrict), so the engine
+// cannot hand it to the AI; it is given back when the unit dies or the setting changes (fnc_opStrict).
+[
+    QGVAR(aiIgnoresUse),
+    "CHECKBOX",
+    [LLSTRING(Setting_AiIgnoresUse), LLSTRING(Setting_AiIgnoresUse_Desc)],
+    true,
+    {[] call FUNC(useRefresh)}
+] call EFUNC(main,addSetting);

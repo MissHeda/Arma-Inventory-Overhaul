@@ -30,7 +30,8 @@ if (!(missionNamespace getVariable [QGVAR(strictActive), false]) || {isNull _con
 
 ([_container] call FUNC(getOwner)) params ["_unit", "_kindName"];
 
-if (_kindName isEqualTo "" || {([_kindName] call FUNC(useMode)) isNotEqualTo USE_STRICT}) exitWith {false};
+// Strict, or an AI that may not ignore the settings (fnc_hiddenStrict).
+if (_kindName isEqualTo "" || {!([_unit, _kindName] call FUNC(hiddenStrict))}) exitWith {false};
 if !([_unit] call FUNC(hiddenActive)) exitWith {false};
 if (([_class, _kindName] call FUNC(useState)) isNotEqualTo "blocked") exitWith {false};
 

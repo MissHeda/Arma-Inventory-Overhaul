@@ -76,7 +76,7 @@ private _fnc_save = {
     private _kind = _x;
     private _container = _own select _index;
     private _list = _lists select _index;
-    private _strict = _active && {!isNull _container} && {([_kind] call FUNC(useMode)) isEqualTo USE_STRICT};
+    private _strict = _active && {!isNull _container} && {[_unit, _kind] call FUNC(hiddenStrict)};
 
     // -----------------------------------------------------------------------
     // 1. Out of the holder.

@@ -281,6 +281,10 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
   machine the unit is local on; what fits nowhere is, for the player's own unit, put on the ground next to him with the hint "No room
   for <name> - put on the ground" (an AI, a body or a crate keeps it as overflow, shown apart). The server setting
   `aio_storage_migrate` ("Move overfull items on": overfull items go to another container, else to the ground) switches that off.
+  An AI is never thinned out: `aio_storage_aiKeepSurplus` ("AI keeps what does not fit", on by default) moves an AI's
+  surplus to any other of its containers with room and leaves what fits none in its inventory - ACE Arsenal on an AI
+  neither stages nor removes it. `aio_storage_aiIgnoresUse` ("AI ignores locked containers", on by default) lets AI use
+  everything it carries; off, what the "Use items from ..." settings close to it is kept out of its cargo, as Strict does.
 - **Adding things from a script or another mod:** `[unit, "class", count, rounds] call aio_storage_fnc_addToUnit` (any machine; the
   last argument is optional and only for magazines, -1 or left out for full ones) puts new things into the unit's uniform, vest
   and backpack - the first with free cells, one with a slot for the item's category first - and returns how many it placed,

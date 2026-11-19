@@ -123,6 +123,12 @@ if (isNull _center || {is3DEN} || {!GVAR(ready)}) exitWith {};
 [{
     params ["_center"];
 
+    // An AI whose surplus is kept (aio_storage_fnc_aiKeeps): nothing is taken out - its surplus goes to another of
+    // its containers with room, both ways, and what fits none stays in its inventory, unannounced.
+    if ([_center] call EFUNC(storage,aiKeeps)) exitWith {
+        [_center] call EFUNC(storage,requestMigrate);
+    };
+
     // The arsenal is gone and with it the question: what still lies beyond the grid of a container is taken
     // out, as the window would have done on the player's word, and said once.
     if (local _center) then {
