@@ -94,10 +94,11 @@ private _crateRoom = [cursorObject, "FirstAidKit", 1] call aio_compat_antistasi_
 ["gridRoom non-unit", true, format ["cursorObject %1 -> %2", typeOf cursorObject, _crateRoom]] call _fnc_check;
 
 // ----- 5. Bazaar purchase -----
-private _fak = {_x == "FirstAidKit"} count (items player);
-["FirstAidKit", 1] call ABZ_fnc_receiveItems;
+// A class ACE does not turn into others, as it does FirstAidKit.
+private _lights = {_x == "acc_flashlight"} count (items player);
+["acc_flashlight", 1] call ABZ_fnc_receiveItems;
 sleep 0.5;
-["receiveItems run", ({_x == "FirstAidKit"} count (items player)) == _fak + 1 || {count (nearestObjects [player, ["GroundWeaponHolder"], 3]) > 0}, format ["FAKs %1 -> %2", _fak, {_x == "FirstAidKit"} count (items player)]] call _fnc_check;
+["receiveItems run", ({_x == "acc_flashlight"} count (items player)) == _lights + 1, format ["flashlights %1 -> %2", _lights, {_x == "acc_flashlight"} count (items player)]] call _fnc_check;
 
 // ----- 6. Money -----
 player setVariable ["moneyX", 100, true];
