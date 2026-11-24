@@ -87,6 +87,16 @@ workshop = [
 ]
 mission = "AIO_Test.VR"
 
+# The same scene with Antistasi Ultimate, for the compat_antistasi addons: run antistasiTest.sqf through the clipboard
+# driver (init.sqf). Antistasi's own mission is not running, the test stubs the few globals its functions read.
+
+#   hemtt launch antistasi
+[hemtt.launch.antistasi]
+extends = "test"
+workshop = [
+    "3020755032", # Antistasi Ultimate
+]
+
 # The same scene with ACRE2 instead of TFAR - the two never load together.
 #
 #   hemtt launch acre
