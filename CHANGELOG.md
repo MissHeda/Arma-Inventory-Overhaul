@@ -2,6 +2,37 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.7.34 - beta
+
+### Added
+
+- Server setting "AI keeps what does not fit" (`aio_storage_aiKeepSurplus`, on): an AI's items that fit no cell go to
+  another of its containers, both ways, else stay in its inventory as surplus - never dropped or removed. ACE Arsenal on
+  an AI no longer takes adds back, stages the surplus or removes it on closing, so custom AI loadouts (a machine gunner
+  with belts in the backpack) stay as they were built.
+- Server setting "AI ignores locked containers" (`aio_storage_aiIgnoresUse`, on): AI uses everything it carries,
+  whatever the "Use items from ..." settings say. Off, what those settings close to an AI is kept out of its cargo, as
+  Strict mode does for players, so it cannot use it.
+- Antistasi Ultimate, covered as a whole (`compat_antistasi`):
+  - Money taken through the window turns into funds, as Antistasi does on the engine's Take; the funds show on the
+    window's footer.
+  - Looking into a dead body or an enemy ammo box from the window (searching it, taking or putting something) makes
+    Antistasi's undercover check, as opening it the vanilla way does.
+  - The layout survives Antistasi's save and load (with what Strict mode keeps out of the containers), a HALO jump - the
+    backpack comes back as it was, partial magazines and weapons included - and Mag Repack.
+  - The trader and the Bazaar count the grid: the Buy button and the server's check know when the gear is full, and the
+    Bazaar puts what does not fit beside the player.
+  - An engineer's mine sweep never deletes a pile of this mod; a lockpick kit is used from a container the "Use items
+    from ..." settings allow first.
+- For other mods: the local event `aio_gui_containerOpened` `[unit, container, root]` when the player looks into someone
+  else's container through the window, and `aio_gui_footerInfo`, codes whose text shows on the footer.
+
+### Changed
+
+- Machine gun belts (and GreenMag Rework's belts) take 2x2 instead of 3x2, so they fit the vest pouches again.
+- Antistasi Ultimate no longer warns at mission start that this mod is an incompatible extender: the Antistasi addons
+  name none of its addons as required any more and do nothing without it.
+
 ## 0.7.33 - beta
 
 ### Fixed
