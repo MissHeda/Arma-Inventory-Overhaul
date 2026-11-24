@@ -71,6 +71,13 @@ GVAR(container) = _container;
 GVAR(secondary) = _secondary;
 GVAR(hooks) = _hooks;
 
+// What the engine opened the window on raised its own InventoryOpened: not again (fnc_noteLooked).
+GVAR(looked) = ([_container, _secondary] select {!isNull _x}) apply {
+    private _root = [_x] call EFUNC(storage,rootOf);
+
+    [_root, _x] select (isNull _root)
+};
+
 GVAR(openedAt) = diag_tickTime;
 
 // The items being searched start again from now - the window was closed meanwhile.

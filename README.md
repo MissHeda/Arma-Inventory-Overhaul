@@ -61,7 +61,9 @@ with "Swap with primary" in the right-click menu, and that mod's own key switche
 Inventory loaded, its handler for the vanilla inventory stays quiet. Works with GreenMag Rework: drag loose rounds, a pack or a
 belt onto a magazine in your gear and GreenMag loads it; its right-click entries are in the window's menu.
 
-Works with Antistasi Ultimate (optional addon `compat_antistasi_arsenal`, loads only with that mod). Antistasi's arsenal
+Works with Antistasi Ultimate (addons `compat_antistasi` and `compat_antistasi_arsenal`). They name none of Antistasi's
+addons as required, so Antistasi does not list them as "extenders" and shows no compatibility warning for them; without
+Antistasi they do nothing. Antistasi's arsenal
 (JNA) gets the grid panel beside its list, as ACE Arsenal does: pick the uniform, vest or backpack tab, drag items from
 the list into the grid, onto the other worn containers or into the staging space, rearrange them, Ctrl+wheel to add or
 take one. Everything counts against the rebels' shared stock: what you drag in is taken from it (other players see the
@@ -71,8 +73,17 @@ row with nothing left says so, non-members keep the minimum the mission leaves i
 come as whole magazines only - take a last partial one with the arsenal's own "+". The vehicle arsenal and the loadout
 arsenal of the commander menu stay as they are. Antistasi's arsenal is always its own window, whatever the vanilla
 arsenal setting says; the server setting "Grids in Antistasi's arsenal" (`aio_compat_antistasi_arsenal_panel`, on by
-default) switches the panel off. Antistasi's "loot around" also picks up the piles this mod drops things into
-(`compat_antistasi`).
+default) switches the panel off. The rest of Antistasi follows the grid (`compat_antistasi`):
+- "Loot around" also picks up the piles this mod drops things into, and an engineer's mine sweep never deletes one.
+- Money you take through the window turns into funds, as Antistasi does on the engine's Take; your funds show on the
+  window's footer.
+- Looking into a dead body or an enemy ammo box from the window (searching it, taking or putting something) makes the
+  same undercover check as opening it the vanilla way.
+- Your layout survives Antistasi's save and load, a HALO jump (the backpack comes back as it was, rounds and weapons
+  included) and Mag Repack; what Strict mode keeps out of the containers is saved too.
+- The trader and the Bazaar count the grid: the Buy button and the server's check know when your gear is full, and the
+  Bazaar puts what does not fit beside you, as it does when there is no room.
+- A lockpick kit is used from a container the "Use items from ..." settings allow first.
 
 ## Building
 

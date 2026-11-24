@@ -146,6 +146,7 @@ PREP(onZeusPlaced);
 PREP(hookCurators);
 PREP(markHidden);
 PREP(learn);
+PREP(noteLooked);
 PREP(findTile);
 PREP(boxTile);
 PREP(updateStatus);

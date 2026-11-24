@@ -149,6 +149,13 @@ if ((_input param [1, objNull]) isEqualType []) exitWith {
                 };
             };
 
+            // Taken from or put into someone else's container: looked into (aio_gui_containerOpened).
+            {
+                if (_x isEqualType objNull) then {
+                    [_x] call FUNC(noteLooked);
+                };
+            } forEach [_from, _to];
+
             // The old item of an equip, where it went in.
             if (_kind isEqualTo "equip" && {"old" in _roles} && {(([_roles get "old"] call _fnc_result) select 0) isEqualTo ""}) then {
                 private _oldTo = _record getOrDefault ["oldTo", objNull];

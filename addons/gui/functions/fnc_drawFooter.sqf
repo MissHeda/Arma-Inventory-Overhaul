@@ -93,7 +93,29 @@ if (_ownKeys isEqualType [] && {_ownKeys isNotEqualTo []}) then {
 
 // What fits: the width of each hint is measured first, the version on the right and a little room before it kept.
 private _versionW = SQUARE(_textUnit * 4);
-private _room = _width - _versionW - SQUARE(UNIT * 0.5);
+
+// Other mods' words before the version, in the inventory only (GVAR(footerInfo): compat_antistasi's money). A code that
+// fails or answers no text adds nothing; together they take the room they need, the key hints and the hint line the rest.
+private _infoSize = _textUnit * 0.62;
+private _info = "";
+
+if (_inventory && {GVAR(footerInfo) isNotEqualTo []}) then {
+    _info = (GVAR(footerInfo) apply {
+        private _said = call _x;
+
+        if (isNil "_said" || {!(_said isEqualType "")}) then {""} else {_said}
+    }) select {_x isNotEqualTo ""} joinString "   ";
+};
+
+private _infoW = 0;
+
+if (_info isNotEqualTo "") then {
+    private _measured = (_info getTextWidth [_theme get "font", _infoSize]) + UNIT * 0.6;
+
+    _infoW = SQUARE(_measured);
+};
+private _rightW = _versionW + _infoW;
+private _room = _width - _rightW - SQUARE(UNIT * 0.5);
 
 _keys = _keys select {(_x select 0) isNotEqualTo ""};
 
@@ -152,6 +174,20 @@ _keys = _keys select [0, _fits];
     "hint"
 ] call FUNC(uiLabel);
 
+if (_infoW > 0) then {
+    [
+        _display,
+        controlNull,
+        [_left + _width - _rightW, FOOT_Y, _infoW, FOOT_H],
+        _info,
+        _infoSize,
+        _theme get "text",
+        _theme get "font",
+        1,
+        "hint"
+    ] call FUNC(uiLabel);
+};
+
 // ----- The hint -----
 
 // Right after the key hints, parted from them by a thin upright line, left-aligned, in their size and on their line:
@@ -161,7 +197,7 @@ _keys = _keys select [0, _fits];
 private _hintGap = SQUARE(_keyH * 0.65);
 private _hintX = _keyX;
 private _hintSize = _textUnit * 0.558;
-private _hintW = (_left + _width - _versionW - SQUARE(UNIT * 0.5)) - _hintX;
+private _hintW = (_left + _width - _rightW - SQUARE(UNIT * 0.5)) - _hintX;
 private _hintCtrl = [_display, "AIO_FooterHint", controlNull, [_hintX, FOOT_Y + (FOOT_H - _hintSize) / 2 + _hintSize * HINT_DROP, _hintW max pixelW, _hintSize * 1.4]] call FUNC(uiCreate);
 
 // Too narrow for words: the line is hidden rather than wrapped over the key hints.
@@ -191,7 +227,7 @@ uiNamespace setVariable [QGVAR(hint), _hintCtrl];
 // Where the double click's key hint goes when the mouse is on something (fnc_footerDouble): right after the keys, the hint line after
 // it. Nothing shown yet.
 uiNamespace setVariable [QGVAR(footerDoubleLayout), [
-    _hintX, FOOT_Y + (FOOT_H - _keyH) / 2, _keyH, _hintGap, _hintY, _hintSize * 1.4, _left + _width - _versionW - SQUARE(UNIT * 0.5)
+    _hintX, FOOT_Y + (FOOT_H - _keyH) / 2, _keyH, _hintGap, _hintY, _hintSize * 1.4, _left + _width - _rightW - SQUARE(UNIT * 0.5)
 ]];
 uiNamespace setVariable [QGVAR(footerDoubleShown), ""];
 uiNamespace setVariable [QGVAR(footerDoubleCtrls), []];

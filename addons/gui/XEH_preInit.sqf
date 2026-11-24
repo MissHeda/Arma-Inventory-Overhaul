@@ -17,6 +17,14 @@ GVAR(openedAt) = -1;
 // fills a searched pile only after the engine opened it: compat_ravage). Compat addons push theirs in a preInit.
 GVAR(openingHolds) = [];
 
+// The roots of the containers the player looked into in this window (fnc_noteLooked, reset by fnc_attach): each
+// raises aio_gui_containerOpened once.
+GVAR(looked) = [];
+
+// Other mods' words on the footer, before the version, in the inventory only (fnc_drawFooter): codes that return a
+// short text - "" or nothing for none. Compat addons push theirs in a preInit (compat_antistasi: the money).
+GVAR(footerInfo) = [];
+
 // The living person the window looks into and how - "whole" or by the "backpack", "" for none - set by
 // fnc_open, watched by fnc_onFrame: a person walks off by themselves.
 GVAR(person) = objNull;

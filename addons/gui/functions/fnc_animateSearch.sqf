@@ -114,6 +114,7 @@ if (_done isNotEqualTo []) then {
         // real grid with every item a hatched footprint.
         if (_class isEqualTo "") then {
             ([_container, true] call FUNC(searchRecord)) set ["unsealed", true];
+            [_container] call FUNC(noteLooked);
             GVAR(searchQueue) = GVAR(searchQueue) select {_x isNotEqualTo _head};
             ["open", "", _container, false] call FUNC(playSound);
             _build = true;
@@ -123,6 +124,7 @@ if (_done isNotEqualTo []) then {
         // What was found makes its own sound, quietly, for the looter alone.
         ["uncover", _class, _container, false] call FUNC(playSound);
         [_container, _class, 1] call FUNC(learn);
+        [_container] call FUNC(noteLooked);
 
         // The item clicked to be searched first (fnc_searchFirst) is found: the box goes on from the top left.
         private _record = [_container] call FUNC(searchRecord);

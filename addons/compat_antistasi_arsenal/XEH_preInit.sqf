@@ -4,6 +4,11 @@ ADDON = false;
 
 #include "XEH_PREP.hpp"
 
+// Without Antistasi's arsenal nothing here: no setting, no pool (config.cpp says why it is not a required addon).
+if !(isClass (configFile >> "CfgPatches" >> "A3A_jeroen_arsenal")) exitWith {
+    ADDON = true;
+};
+
 // For everyone alike: whether the grid panel lies beside Antistasi's arsenal. Off, JNA's arsenal is left as it is.
 [
     QGVAR(panel),
