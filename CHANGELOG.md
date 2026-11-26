@@ -24,6 +24,9 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
     Bazaar puts what does not fit beside the player.
   - An engineer's mine sweep never deletes a pile of this mod; a lockpick kit is used from a container the "Use items
     from ..." settings allow first.
+- The inspect card of a magazine shows its round: muzzle velocity, damage, splash for an explosive one and penetration
+  (Arma's measure in mm RHA at the muzzle); with ACE also bullet weight, ballistic coefficient with its drag model and
+  calibre. The velocity is the magazine's - a weapon's barrel (and ACE's barrel length setting) can change it.
 - For other mods: the local event `aio_gui_containerOpened` `[unit, container, root]` when the player looks into someone
   else's container through the window, and `aio_gui_footerInfo`, codes whose text shows on the footer.
 

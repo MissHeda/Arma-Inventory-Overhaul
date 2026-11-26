@@ -194,6 +194,7 @@ PREP(glowSlot);
 PREP(warmTargets);
 PREP(inspect);
 PREP(drawInspect);
+PREP(ammoRows);
 PREP(growSlots);
 PREP(inspect3D);
 PREP(cardScene);

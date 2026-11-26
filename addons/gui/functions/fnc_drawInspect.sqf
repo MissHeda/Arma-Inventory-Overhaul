@@ -5,8 +5,8 @@
  * Draws the inspect card (GVAR(inspect), fnc_inspect): a glass window with the item's picture - what is
  * on a weapon drawn onto it, or for an item with a model of its own the item in 3D (fnc_inspect3D), as the
  * 2D/3D switch in the picture's corner says -, its name in its category's colour, its description and its figures:
- * weight, size, count, rounds, whether it stacks, its category, the mod it comes from
- * and its class name. A kit of Enhanced First Aid Kits also how full it is and what is in it
+ * weight, size, count, rounds, a magazine's ballistics (fnc_ammoRows), whether it stacks, its category, the mod it
+ * comes from and its class name. A kit of Enhanced First Aid Kits also how full it is and what is in it
  * (aio_compat_efak), a radio its channel, frequency and state (aio_compat_tfar, aio_compat_acre -
  * whichever mod is loaded). A window that attached (fnc_attach) adds rows of its own before the mod's name (the
  * "inspectRows" hook) - a text, or a text beside a small bar. Everything lies in one controls group, so the card moves as one: by its title
@@ -143,6 +143,9 @@ private _capacity = _info getOrDefault ["capacity", 0];
 if (_capacity > 0) then {
     _rows pushBack [LLSTRING(Inspect_Rounds), format ["%1 / %2", [_ammo, _capacity] select (_ammo < 0), _capacity]];
 };
+
+// A magazine's round: velocity, damage, penetration and, with ACE, bullet weight, ballistic coefficient and calibre (fnc_ammoRows).
+_rows append ([_class] call FUNC(ammoRows));
 
 _rows pushBack [LLSTRING(Inspect_Category), [
     LLSTRING(Category_Misc), LLSTRING(Category_Gear), LLSTRING(Category_Weapon), LLSTRING(Category_Ammo), LLSTRING(Category_Medical)

@@ -352,6 +352,21 @@
         <Key ID="STR_aio_gui_Inspect_Attached">
             <English>Attachments</English>
         </Key>
+        <Key ID="STR_aio_gui_Inspect_BallisticCoefficient">
+            <English>Ballistic coefficient</English>
+        </Key>
+        <Key ID="STR_aio_gui_Inspect_BulletMass">
+            <English>Bullet weight</English>
+        </Key>
+        <Key ID="STR_aio_gui_Inspect_BulletMassValue">
+            <English>%1 g (%2 gr)</English>
+        </Key>
+        <Key ID="STR_aio_gui_Inspect_Caliber">
+            <English>Calibre</English>
+        </Key>
+        <Key ID="STR_aio_gui_Inspect_CaliberValue">
+            <English>%1 mm</English>
+        </Key>
         <Key ID="STR_aio_gui_Inspect_Category">
             <English>Category</English>
         </Key>
@@ -360,6 +375,9 @@
         </Key>
         <Key ID="STR_aio_gui_Inspect_Count">
             <English>Count</English>
+        </Key>
+        <Key ID="STR_aio_gui_Inspect_Damage">
+            <English>Damage</English>
         </Key>
         <Key ID="STR_aio_gui_Inspect_Mod">
             <English>Mod</English>
@@ -370,14 +388,32 @@
         <Key ID="STR_aio_gui_Inspect_No">
             <English>No</English>
         </Key>
+        <Key ID="STR_aio_gui_Inspect_Penetration">
+            <English>Penetration</English>
+        </Key>
+        <Key ID="STR_aio_gui_Inspect_PenetrationValue">
+            <English>~%1 mm RHA at the muzzle</English>
+        </Key>
         <Key ID="STR_aio_gui_Inspect_Rounds">
             <English>Rounds</English>
         </Key>
         <Key ID="STR_aio_gui_Inspect_Size">
             <English>Size</English>
         </Key>
+        <Key ID="STR_aio_gui_Inspect_Splash">
+            <English>Splash</English>
+        </Key>
+        <Key ID="STR_aio_gui_Inspect_SplashValue">
+            <English>%1 within %2 m</English>
+        </Key>
         <Key ID="STR_aio_gui_Inspect_Stackable">
             <English>Stackable</English>
+        </Key>
+        <Key ID="STR_aio_gui_Inspect_Velocity">
+            <English>Muzzle velocity</English>
+        </Key>
+        <Key ID="STR_aio_gui_Inspect_VelocityValue">
+            <English>%1 m/s</English>
         </Key>
         <Key ID="STR_aio_gui_Inspect_ViewLeft">
             <English>Left</English>

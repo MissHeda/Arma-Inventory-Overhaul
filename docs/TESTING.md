@@ -208,6 +208,11 @@ A client can see them and cannot change them.
       vehicle all open ours; after a respawn, a team switch and in Zeus remote control as well; with Better Inventory
       loaded `findDisplay 602` stays null; the setting "Replace the vanilla inventory" is gone from the CBA menu.
 
+- [ ] Ammo on the inspect card (Steam comment): Inspect a `30Rnd_65x39_caseless_mag` - Muzzle velocity, Damage, Penetration
+      ("~... mm RHA at the muzzle"); with ACE also Bullet weight (g and gr), Ballistic coefficient ("0.xxx G7") and Calibre. A
+      `HandGrenade` shows Damage and Splash, no velocity; a smoke grenade and a chemlight none of the rows. A weapon or vest none.
+      No RPT error, the card's height fits the extra rows.
+
 ## C. ACE Arsenal panel
 
 - [ ] Panel only on the uniform, vest, backpack tab; as tall as the side lists; the inventory's glass and corner radius.
